@@ -1,0 +1,48 @@
+﻿@page
+@model DebateRoyale.Pages.StanzeListModel
+@using Microsoft.AspNetCore.Identity
+@using DebateRoyale.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Available Rooms";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!SignInManager.IsSignedIn(User))
+{
+    <p class="alert alert-warning">You need to <a asp-area="Identity" asp-page="/Account/Login">Login</a> to enter a room.</p>
+}
+else
+{
+    @if (Model.Rooms.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Room Name</th>
+                    <th>General Topic</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var room in Model.Rooms)
+                {
+                    <tr>
+                        <td>@room.Name</td>
+                        <td>@room.GeneralTopic</td>
+                        <td>
+                            <a class="btn btn-primary" asp-page="/Stanza" asp-route-roomId="@room.Id">Enter Room</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No rooms available at the moment.</p>
+    }
+}

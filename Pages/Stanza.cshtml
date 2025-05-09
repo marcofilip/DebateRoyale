@@ -1,0 +1,86 @@
+﻿@page "{roomId:int}"
+@model DebateRoyale.Pages.StanzaModel
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = Model.CurrentRoom?.Name ?? "Debate Room";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+@if (Model.CurrentRoom == null)
+{
+    <p class="alert alert-danger">Room not found.</p>
+    <p><a asp-page="/StanzeList">Back to Rooms List</a></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            <h2>@Model.CurrentRoom.Name <small class="text-muted">(@Model.CurrentRoom.GeneralTopic)</small></h2>
+            <hr />
+
+            <div id="debateStatus" class="mb-3">
+                Waiting for opponent...
+            </div>
+
+            <div id="debateArea" style="display: none;">
+                <h4>Topic: <span id="debateTopic"></span></h4>
+                <p>Debaters: <strong id="debater1Name"></strong> vs <strong id="debater2Name"></strong></p>
+                <p>Time Remaining: <span id="timer">00:00</span></p>
+                <hr />
+                <div id="chatBox" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="input-group mb-3" id="messageInputArea">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Type your argument..." />
+                    <button id="sendButton" class="btn btn-primary">Send</button>
+                </div>
+                <div id="voteArea" style="display:none;">
+                    <p>Who is arguing better?</p>
+                    <button id="voteDebater1" class="btn btn-outline-primary">Vote for <span class="debater1-vote-name"></span></button>
+                    (<span id="debater1Votes">0</span> votes)
+                    <button id="voteDebater2" class="btn btn-outline-secondary">Vote for <span class="debater2-vote-name"></span></button>
+                    (<span id="debater2Votes">0</span> votes)
+                </div>
+            </div>
+
+            <div id="chatMessagesNonDebate" style="height: 150px; overflow-y: scroll; border: 1px solid #eee; padding: 10px; margin-bottom: 10px;">
+                <!-- General chat messages when no debate is active -->
+            </div>
+            <div class="input-group mb-3" id="chatInputAreaNonDebate">
+                <input type="text" id="chatMessageInput" class="form-control" placeholder="Type a message..." />
+                <button id="sendChatMessageButton" class="btn btn-info">Send Chat</button>
+            </div>
+
+
+            <div id="resultsArea" class="mt-4" style="display:none;">
+                <h3>Debate Results</h3>
+                <p><strong>Winner:</strong> <span id="winnerName"></span></p>
+                <p><strong>Spectator Votes:</strong> <span class="debater1-vote-name"></span> (<span id="finalDebater1Votes">0</span>) vs <span class="debater2-vote-name"></span> (<span id="finalDebater2Votes">0</span>)</p>
+                <p><strong>AI Analysis:</strong></p>
+                <div id="aiAnalysisResult" style="white-space: pre-wrap; background-color: #f8f9fa; border: 1px solid #dee2e6; padding:10px; border-radius: 5px;"></div>
+                <button id="readyForNewDebate" class="btn btn-success mt-3">Ready for New Debate</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h4>Participants</h4>
+            <ul id="participantsList" class="list-group">
+                <!-- Participants will be listed here by SignalR -->
+            </ul>
+            <p id="connectionStatus" class="mt-2">Connecting to room...</p>
+        </div>
+    </div>
+}
+
+<p>DEBUG: Room ID from Model is: @Model.CurrentRoom?.Id</p>
+<p>DEBUG: currentUserId from Model is: @currentUserId</p>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.min.js"></script>
+    <script>
+        const roomId = @(Model.CurrentRoom?.Id ?? 0);
+        const currentUserId = "@currentUserId";
+        console.log('INLINE SCRIPT: roomId =', roomId, '; currentUserId =', currentUserId);
+    </script>
+    <script src="~/js/stanza.js" asp-append-version="true"></script>
+}

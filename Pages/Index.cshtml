@@ -1,0 +1,19 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to DebateRoyale</h1>
+    <p>Engage in 1v1 textual debates, watch others, vote, and see AI judges rate the performance!</p>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <p><a class="btn btn-primary" asp-page="/StanzeList">Enter a Debate Room</a></p>
+    }
+    else
+    {
+        <p><a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login to Participate</a></p>
+        <p><a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Register">Register an Account</a></p>
+    }
+</div>

@@ -1,0 +1,8 @@
+﻿@using DebateRoyale
+@using DebateRoyale.Models // Assicurati che ApplicationUser sia qui o nel namespace principale
+@using Microsoft.AspNetCore.Identity
+@namespace DebateRoyale.Pages // Il namespace delle tue PageModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager

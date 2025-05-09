@@ -1,0 +1,123 @@
+# .NET Core / VS auto-generated
+## Ignore Visual Studio temporary files, build results, and user-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore Visual Studio Solution Options files
+*.DotSettings.user
+
+# Ignore Resharper and Rider temporary files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings
+
+# Ignore Rider files
+.idea/
+*.idea_project/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Ignore symbol packages
+# NuGet - auto-generated packages folder
+*.nupkg
+*.snupkg
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+# Downloaded packages from NuGet
+packages/
+# except for versions that are manually downloaded and included in the solution.
+!packages/some-specific-package-version/ 
+
+# Roslyn files
+.roslyn/
+
+# Dotnet Tooling
+.store/
+
+# Cache files
+*. NuGet.props
+*. NuGet.targets
+
+# Secrets
+secrets.json
+appsettings.Development.json # A volte si ignora, ma nel tuo caso contiene la GeminiKey, quindi valuta
+                             # Se vuoi che chi clona il repo debba aggiungere la sua chiave qui,
+                             # allora NON ignorarlo e metti un placeholder come "LA_TUA_API_KEY_QUI".
+                             # Se invece vuoi che ognuno crei il suo file o usi User Secrets, allora ignoralo.
+                             # Data la guida rapida nel tuo README, sembra che tu voglia che NON sia ignorato.
+
+# User Secrets (se li usi per la Gemini API Key invece di appsettings.Development.json)
+# Questo è il modo più sicuro per gestire le chiavi API senza committarle.
+# Se usi 'dotnet user-secrets set "GeminiApiKey" "LA_TUA_CHIAVE"', questa cartella verrà creata.
+%APPDATA%/Microsoft/UserSecrets/<user_secrets_id>/secrets.json # Windows
+~/.microsoft/usersecrets/<user_secrets_id>/secrets.json # macOS/Linux
+
+# Visual Studio Code files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# SQLite database file (se vuoi che ogni sviluppatore abbia il suo DB vuoto all'inizio)
+# Se invece il file .db contiene dati di seed importanti che vuoi condividere, NON ignorarlo.
+# Nel tuo caso, `app.db` viene creato dalle migrazioni e i dati di seed sono nel DbContext,
+# quindi è MEGLIO IGNORARE app.db. Ogni sviluppatore lo genererà con `dotnet ef database update`.
+app.db
+app.db-shm
+app.db-wal
+
+# Log files
+*.log
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+
+# Output files from running tasks
+*.Cache
+ClientBin*/
+
+# Editor specific files
+*.tmproj
+*.dtproj
+*.csproj.user
+
+# Environment files (se ne usi, es. .env)
+.env
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Specifico per il tuo progetto
+# Se hai altre cartelle/file generati localmente che non vuoi nel repo
+
+.vs/
