@@ -45,6 +45,7 @@ public class RoomStateService
         "Is a universal basic income a viable solution to poverty?"
     };
     private readonly Random _random = new();
+    private const int DebateDurationSecondsConfig = 3 * 60;
 
     public RoomStateService(IHubContext<StanzaHub> hubContext, IServiceScopeFactory scopeFactory, GeminiService geminiService)
     {
@@ -62,11 +63,29 @@ public class RoomStateService
         _userConnectionsToRoom[connectionId] = roomId;
         var debate = _activeDebates.GetOrAdd(roomId, _ => new ActiveDebateState { RoomId = roomId });
 
-        if (debate.IsActive)
+        if (debate.IsActive) // L'utente si unisce a un dibattito attivo come spettatore
         {
-            // User is joining as a spectator to an active debate
-            await _hubContext.Clients.Client(connectionId).SendAsync("DebateAlreadyInProgress", debate.SpecificTopic,
-                debate.Debater1Username, debate.Debater2Username, debate.Transcript, (int)(debate.StartTime.AddMinutes(5) - DateTime.UtcNow).TotalSeconds);
+            // Calcola il tempo rimanente usando la configurazione corretta
+            double remainingSecondsDouble = 0;
+            if (debate.StartTime != DateTime.MinValue) // Assicurati che StartTime sia stato impostato
+            {
+                // USA LA COSTANTE CORRETTA QUI
+                TimeSpan totalDebateDuration = TimeSpan.FromSeconds(DebateDurationSecondsConfig);
+                TimeSpan elapsed = DateTime.UtcNow - debate.StartTime;
+                remainingSecondsDouble = (totalDebateDuration - elapsed).TotalSeconds;
+
+                if (remainingSecondsDouble < 0) remainingSecondsDouble = 0;
+            }
+            int timeRemainingForSpectator = (int)remainingSecondsDouble;
+            
+            // Invia il tempo rimanente corretto
+            await _hubContext.Clients.Client(connectionId).SendAsync("DebateAlreadyInProgress", 
+                debate.SpecificTopic,
+                debate.Debater1Username, 
+                debate.Debater2Username, 
+                debate.Transcript.ToList(), // Buona pratica inviare una copia
+                timeRemainingForSpectator 
+            );
         }
         else if (string.IsNullOrEmpty(debate.Debater1ConnectionId) && debate.Debater1UserId != userId)
         {
@@ -81,7 +100,6 @@ public class RoomStateService
             debate.Debater2UserId = userId;
             debate.Debater2Username = username;
             await _hubContext.Clients.Group(roomId.ToString()).SendAsync("ParticipantJoined", username, 2);
-            // Both debaters are here, start the debate
             await StartDebate(roomId);
         }
         else
@@ -144,7 +162,7 @@ public class RoomStateService
         debate.Votes.Clear();
         debate.IsEnding = false;
 
-        const int debateDurationSeconds = 3 * 60;
+        const int debateDurationSeconds = DebateDurationSecondsConfig;
 
         await _hubContext.Clients.Group(roomId.ToString()).SendAsync("DebateStarted",
             debate.SpecificTopic, debate.Debater1Username, debate.Debater2Username, debate.Debater1UserId, debate.Debater2UserId, debateDurationSeconds);
