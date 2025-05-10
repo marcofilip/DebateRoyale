@@ -24,6 +24,7 @@ else
                 <tr>
                     <th>Room Name</th>
                     <th>General Topic</th>
+                    <th>Users Online</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -33,6 +34,7 @@ else
                     <tr>
                         <td>@room.Name</td>
                         <td>@room.GeneralTopic</td>
+                        <td>@room.UserCount</td>
                         <td>
                             <a class="btn btn-primary" asp-page="/Stanza" asp-route-roomId="@room.Id">Enter Room</a>
                         </td>

@@ -311,4 +311,14 @@ public class RoomStateService
         // or the UI can prompt them. For simplicity, we fully reset.
         // New participants joining will trigger UserJoinedRoom and potentially a new debate.
     }
+
+    public Dictionary<int, int> GetActiveUserCountsPerRoom()
+    {
+        var counts = new Dictionary<int, int>();
+        foreach (var group in _userConnectionsToRoom.GroupBy(conn => conn.Value))
+        {
+            counts[group.Key] = group.Count();
+        }
+        return counts;
+    }
 }
