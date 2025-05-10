@@ -33,17 +33,52 @@ public class RoomStateService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly GeminiService _geminiService;
 
-    private static readonly List<string> GeneralDebateTopics = new()
+    private static readonly Dictionary<int, List<string>> RoomSpecificDebateTopics = new()
     {
-        "Is social media more beneficial or harmful to society?",
-        "Should remote work be the new standard?",
-        "Is artificial intelligence a threat to humanity?",
+        // Stanza ID 1: Politics Arena
+        { 1, new List<string> {
+            "Should voting age be lowered to 16?",
+            "Is a universal basic income a viable solution for modern economies?",
+            "Should lobbying be more strictly regulated?",
+            "Is the current electoral system fair?",
+            "What is the government's role in healthcare?"
+        }},
+        // Stanza ID 2: Tech Sphere
+        { 2, new List<string> {
+            "Will AI surpass human intelligence, and what are the implications?",
+            "Is data privacy an illusion in the digital age?",
+            "Should cryptocurrencies be regulated by governments?",
+            "The ethics of gene editing: where do we draw the line?",
+            "Are social media algorithms detrimental to society?"
+        }},
+        // Stanza ID 3: Philosophy Hall
+        { 3, new List<string> {
+            "Does free will truly exist?",
+            "What is the nature of consciousness?",
+            "Is there an objective morality, or is it all relative?",
+            "The Trolley Problem: What is the most ethical choice?",
+            "What is the meaning of a good life?"
+        }},
+        // Stanza ID 4: Pop Culture Corner
+        { 4, new List<string> {
+            "Star Wars vs. Star Trek: Which is superior?",
+            "Are superhero movies oversaturating the film industry?",
+            "The impact of streaming services on music and film consumption.",
+            "Is reality TV a harmless entertainment убийца or a societal ill?", // "убийца" seems like a placeholder, replace it
+            "The evolution of video games as an art form."
+        }}
+        // Aggiungi una lista di argomenti di fallback se l'ID della stanza non viene trovato
+        // o se una stanza non ha argomenti specifici definiti.
+        // Potresti usare una chiave speciale come 0 o -1, o semplicemente una lista separata.
+    };
+
+    private static readonly List<string> FallbackDebateTopics = new()
+    {
         "Should pineapple be on pizza?",
         "Cats vs. Dogs: Which make better pets?",
-        "Is space exploration worth the investment?",
-        "Should voting be mandatory?",
-        "Is a universal basic income a viable solution to poverty?"
+        "Is it better to live in the city or the countryside?"
     };
+
     private readonly Random _random = new();
     private const int DebateDurationSecondsConfig = 3 * 60;
 
@@ -54,7 +89,29 @@ public class RoomStateService
         _geminiService = geminiService;
     }
 
-    public string GetRandomTopic() => GeneralDebateTopics[_random.Next(GeneralDebateTopics.Count)];
+    public string GetRandomTopic(int roomId)
+    {
+        if (RoomSpecificDebateTopics.TryGetValue(roomId, out var specificTopics) && specificTopics.Any())
+        {
+            // Abbiamo argomenti specifici per questa stanza
+            return specificTopics[_random.Next(specificTopics.Count)];
+        }
+        else
+        {
+            // Fallback se la stanza non ha argomenti specifici o l'ID non è trovato
+            // Potresti loggare un warning qui se ti aspetti che tutte le stanze abbiano argomenti
+            // _logger.LogWarning("No specific topics found for Room ID {RoomId}. Using fallback topic.", roomId);
+            if (FallbackDebateTopics.Any())
+            {
+                return FallbackDebateTopics[_random.Next(FallbackDebateTopics.Count)];
+            }
+            else
+            {
+                // Estremo fallback se anche la lista di fallback è vuota
+                return "Discuss any interesting topic!";
+            }
+        }
+    }
 
     public ActiveDebateState? GetActiveDebate(int roomId) => _activeDebates.TryGetValue(roomId, out var debate) ? debate : null;
 
@@ -156,7 +213,7 @@ public class RoomStateService
             return;
 
         debate.IsActive = true;
-        debate.SpecificTopic = GetRandomTopic();
+        debate.SpecificTopic = GetRandomTopic(roomId);
         debate.StartTime = DateTime.UtcNow;
         debate.Transcript.Clear();
         debate.Votes.Clear();
