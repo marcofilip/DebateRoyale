@@ -10,6 +10,7 @@ let debater2Global = null;
 let debater1UserIdGlobal = null;
 let debater2UserIdGlobal = null;
 let countdownInterval = null;
+let hasVoted = false;
 
 // DOM Elements
 const debateStatusDiv = document.getElementById("debateStatus");
@@ -115,29 +116,51 @@ connection.on("ParticipantLeft", (username) => {
 
 connection.on("SpectatorJoined", (debater1, debater2) => {
     console.log("Joined as spectator.");
-    debateStatusDiv.textContent = `Waiting for debate between ${
-        debater1 || "Debater 1"
-    } and ${debater2 || "Debater 2"} to start.`;
+    debateStatusDiv.textContent = `Waiting for debate between ${debater1 || "Debater 1"
+        } and ${debater2 || "Debater 2"} to start.`;
 });
 
 connection.on(
     "DebateAlreadyInProgress",
-    (topic, debater1, debater2, transcript, timeRemainingSeconds) => {
-        console.log("Debate already in progress. Joining as spectator.");
+    (
+        topic,
+        debater1Name, // Nome del dibattente 1 dal server
+        debater2Name, // Nome del dibattente 2 dal server
+        transcript,
+        timeRemainingSeconds,
+        serverDebater1Id, // ID del dibattente 1 dal server
+        serverDebater2Id, // ID del dibattente 2 dal server
+        spectatorHasAlreadyVotedParam, // boolean se lo spettatore ha già votato
+        currentVotes1, // Conteggio voti attuale per dibattente 1
+        currentVotes2  // Conteggio voti attuale per dibattente 2
+    ) => {
+        console.log(`DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`);
+
+        clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
+        // Poi la nascondiamo di nuovo per mostrare il dibattito
+
         debateStatusDiv.style.display = "none";
-        debateAreaDiv.style.display = "block";
+        debateAreaDiv.style.display = "block"; // Mostra l'area principale del dibattito
         resultsAreaDiv.style.display = "none";
 
-        // Hide general chat
-        chatMessagesNonDebateDiv.style.display = "none";
-        document.getElementById("chatInputAreaNonDebate").style.display =
-            "none";
+        // Nascondi la chat non-dibattito perché siamo in un dibattito attivo
+        if (chatMessagesNonDebateDiv) chatMessagesNonDebateDiv.style.display = "none";
+        const chatInputNonDebate = document.getElementById("chatInputAreaNonDebate");
+        if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
+        // Imposta informazioni del dibattito
         debateTopicSpan.textContent = topic;
-        debater1NameSpan.textContent = debater1;
-        debater2NameSpan.textContent = debater2;
-        debater1Global = debater1; // For vote button text
-        debater2Global = debater2; // For vote button text
+        debater1NameSpan.textContent = debater1Name;
+        debater2NameSpan.textContent = debater2Name;
+
+        // Imposta le variabili globali cruciali per i nomi e gli ID dei dibattenti
+        debater1Global = debater1Name;
+        debater2Global = debater2Name;
+        debater1UserIdGlobal = serverDebater1Id;
+        debater2UserIdGlobal = serverDebater2Id;
+        console.log(`DebateAlreadyInProgress: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`);
+
+        // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
             .querySelectorAll(".debater1-vote-name")
             .forEach((el) => (el.textContent = debater1Global));
@@ -145,15 +168,38 @@ connection.on(
             .querySelectorAll(".debater2-vote-name")
             .forEach((el) => (el.textContent = debater2Global));
 
-        chatBox.innerHTML = ""; // Clear previous messages
+        // Popola la trascrizione
+        chatBox.innerHTML = ""; // Pulisci messaggi precedenti
         transcript.forEach((msg) => {
-            const parts = msg.split(": ");
-            addMessageToChat(parts[0], parts.slice(1).join(": "));
+            const parts = msg.split(": "); // Semplice split, potrebbe essere migliorato
+            if (parts.length >= 2) {
+                addMessageToChat(parts[0], parts.slice(1).join(": "));
+            } else {
+                addMessageToChat(null, msg, true); // Messaggio di sistema o formato strano
+            }
         });
 
-        messageInputArea.style.display = "none"; // Spectators can't send messages to debate
-        voteAreaDiv.style.display = "block";
+        // Gli spettatori non possono inviare messaggi al dibattito
+        if (messageInputArea) messageInputArea.style.display = "none";
 
+        // Gestisci l'area di voto per lo spettatore
+        if (voteAreaDiv) {
+            // Solo gli spettatori vedono l'area di voto
+            if (currentUserId !== serverDebater1Id && currentUserId !== serverDebater2Id) {
+                voteAreaDiv.style.display = "block";
+                hasVoted = spectatorHasAlreadyVotedParam; // Imposta se lo spettatore ha già votato
+                if (voteDebater1Button) voteDebater1Button.disabled = hasVoted;
+                if (voteDebater2Button) voteDebater2Button.disabled = hasVoted;
+            } else {
+                voteAreaDiv.style.display = "none"; // Nascondi se l'utente è uno dei dibattenti (caso limite)
+            }
+        }
+
+        // Aggiorna i conteggi dei voti visualizzati
+        if (debater1VotesSpan) debater1VotesSpan.textContent = currentVotes1;
+        if (debater2VotesSpan) debater2VotesSpan.textContent = currentVotes2;
+
+        // Imposta il timer
         if (countdownInterval) clearInterval(countdownInterval);
         let timeLeft = timeRemainingSeconds;
         timerSpan.textContent = formatTime(timeLeft);
@@ -163,6 +209,7 @@ connection.on(
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 timerSpan.textContent = "Time's up!";
+                // Il server invierà "DebateEnded"
             }
         }, 1000);
     }
@@ -172,32 +219,40 @@ connection.on(
     "DebateStarted",
     (
         topic,
-        debater1,
-        debater2,
-        debater1UserId,
-        debater2UserId,
+        debater1Name,     // Nome del dibattente 1 dal server
+        debater2Name,     // Nome del dibattente 2 dal server
+        serverDebater1Id, // ID del dibattente 1 dal server
+        serverDebater2Id, // ID del dibattente 2 dal server
         durationSeconds
     ) => {
-        console.log(
-            `Debate started on: ${topic} between ${debater1} and ${debater2}`
-        );
+        console.log(`DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`);
+
+        clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
+        // Poi la nascondiamo di nuovo per mostrare il dibattito
+
         debateStatusDiv.style.display = "none";
-        debateAreaDiv.style.display = "block";
+        debateAreaDiv.style.display = "block"; // Mostra l'area principale del dibattito
         resultsAreaDiv.style.display = "none";
 
-        // Hide general chat
-        chatMessagesNonDebateDiv.style.display = "none";
-        document.getElementById("chatInputAreaNonDebate").style.display =
-            "none";
+        // Nascondi la chat non-dibattito perché un dibattito è iniziato
+        if (chatMessagesNonDebateDiv) chatMessagesNonDebateDiv.style.display = "none";
+        const chatInputNonDebate = document.getElementById("chatInputAreaNonDebate");
+        if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
+        // Imposta informazioni del dibattito
         debateTopicSpan.textContent = topic;
-        debater1NameSpan.textContent = debater1;
-        debater2NameSpan.textContent = debater2;
-        debater1Global = debater1;
-        debater2Global = debater2;
-        debater1UserIdGlobal = debater1UserId;
-        debater2UserIdGlobal = debater2UserId;
+        debater1NameSpan.textContent = debater1Name;
+        debater2NameSpan.textContent = debater2Name;
 
+        // Imposta le variabili globali cruciali
+        debater1Global = debater1Name;
+        debater2Global = debater2Name;
+        debater1UserIdGlobal = serverDebater1Id;
+        debater2UserIdGlobal = serverDebater2Id;
+        console.log(`DebateStarted: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`);
+
+
+        // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
             .querySelectorAll(".debater1-vote-name")
             .forEach((el) => (el.textContent = debater1Global));
@@ -205,19 +260,29 @@ connection.on(
             .querySelectorAll(".debater2-vote-name")
             .forEach((el) => (el.textContent = debater2Global));
 
-        chatBox.innerHTML = ""; // Clear previous messages
+        chatBox.innerHTML = ""; // Pulisci la chatBox per il nuovo dibattito
 
-        if (
-            currentUserId === debater1UserId ||
-            currentUserId === debater2UserId
-        ) {
-            messageInputArea.style.display = "flex";
-            voteAreaDiv.style.display = "none";
+        // Gestisci la visibilità dell'input del dibattito e dell'area di voto
+        if (currentUserId === serverDebater1Id || currentUserId === serverDebater2Id) {
+            // L'utente è un dibattente
+            if (messageInputArea) messageInputArea.style.display = "flex";
+            if (voteAreaDiv) voteAreaDiv.style.display = "none";
         } else {
-            messageInputArea.style.display = "none";
-            voteAreaDiv.style.display = "block";
+            // L'utente è uno spettatore
+            if (messageInputArea) messageInputArea.style.display = "none";
+            if (voteAreaDiv) {
+                hasVoted = false; // Gli spettatori iniziano un nuovo dibattito senza aver votato
+                if (voteDebater1Button) voteDebater1Button.disabled = false;
+                if (voteDebater2Button) voteDebater2Button.disabled = false;
+                voteAreaDiv.style.display = "block";
+            }
         }
 
+        // Resetta i conteggi dei voti visualizzati a 0 per un nuovo dibattito
+        if (debater1VotesSpan) debater1VotesSpan.textContent = "0";
+        if (debater2VotesSpan) debater2VotesSpan.textContent = "0";
+
+        // Imposta il timer
         if (countdownInterval) clearInterval(countdownInterval);
         let timeLeft = durationSeconds;
         timerSpan.textContent = formatTime(timeLeft);
@@ -227,11 +292,63 @@ connection.on(
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 timerSpan.textContent = "Time's up!";
-                // Server will send DebateEnded
+                // Il server invierà "DebateEnded"
             }
         }, 1000);
     }
 );
+
+if (voteDebater1Button) {
+    voteDebater1Button.addEventListener("click", event => {
+        event.preventDefault();
+        if (hasVoted) {
+            addMessageToChat(null, "You have already voted in this debate.", true);
+            return;
+        }
+        if (debater1UserIdGlobal) {
+            const confirmationMessage = "Are you sure you want to vote for " + (debater1Global || "Debater 1") + "? " + // Aggiunto fallback per nome
+                "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
+            if (confirm(confirmationMessage)) {
+                connection.invoke("CastVote", roomId, debater1UserIdGlobal)
+                    .then(() => {
+                        hasVoted = true;
+                        voteDebater1Button.disabled = true;
+                        voteDebater2Button.disabled = true;
+                        addMessageToChat(null, `You voted for ${debater1Global || "Debater 1"}.`, true);
+                    })
+                    .catch(err => { console.error("SignalR invoke error on 'NomeMetodoHub':", err.toString()); });
+            }
+        } else {
+            console.error("Cannot vote for Debater 1: debater1UserIdGlobal is not set.");
+        }
+    });
+}
+
+if (voteDebater2Button) {
+    voteDebater2Button.addEventListener("click", event => {
+        event.preventDefault();
+        if (hasVoted) {
+            addMessageToChat(null, "You have already voted in this debate.", true);
+            return;
+        }
+        if (debater2UserIdGlobal) {
+            const confirmationMessage = "Are you sure you want to vote for " + (debater2Global || "Debater 2") + "? " +
+                "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
+            if (confirm(confirmationMessage)) {
+                connection.invoke("CastVote", roomId, debater2UserIdGlobal)
+                    .then(() => {
+                        hasVoted = true;
+                        voteDebater1Button.disabled = true;
+                        voteDebater2Button.disabled = true;
+                        addMessageToChat(null, `You voted for ${debater2Global || "Debater 2"}.`, true);
+                    })
+                    .catch(err => { console.error("SignalR invoke error on 'NomeMetodoHub':", err.toString()); });
+            }
+        } else {
+            console.error("Cannot vote for Debater 2: debater2UserIdGlobal is not set.");
+        }
+    });
+}
 
 function formatTime(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
@@ -272,6 +389,9 @@ connection.on("DebateEnded", (winnerName, aiAnalysis, d1Votes, d2Votes) => {
     debater2Global = null;
     debater1UserIdGlobal = null;
     debater2UserIdGlobal = null;
+    hasVoted = false;
+    if (voteDebater1Button) voteDebater1Button.disabled = true;
+    if (voteDebater2Button) voteDebater2Button.disabled = true;
 });
 
 // Event Listeners

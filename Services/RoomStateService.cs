@@ -33,6 +33,7 @@ public class RoomStateService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly GeminiService _geminiService;
 
+
     private static readonly Dictionary<int, List<string>> RoomSpecificDebateTopics = new()
     {
         // Stanza ID 1: Politics Arena
@@ -134,14 +135,23 @@ public class RoomStateService
                 if (remainingSecondsDouble < 0) remainingSecondsDouble = 0;
             }
             int timeRemainingForSpectator = (int)remainingSecondsDouble;
-            
-            // Invia il tempo rimanente corretto
-            await _hubContext.Clients.Client(connectionId).SendAsync("DebateAlreadyInProgress", 
+
+            bool spectatorHasAlreadyVoted = debate.Votes.ContainsKey(userId);
+
+            int currentVotes1 = debate.Votes.Count(v => v.Value == debate.Debater1UserId);
+            int currentVotes2 = debate.Votes.Count(v => v.Value == debate.Debater2UserId);
+
+            await _hubContext.Clients.Client(connectionId).SendAsync("DebateAlreadyInProgress",
                 debate.SpecificTopic,
-                debate.Debater1Username, 
-                debate.Debater2Username, 
+                debate.Debater1Username,
+                debate.Debater2Username,
                 debate.Transcript.ToList(), // Buona pratica inviare una copia
-                timeRemainingForSpectator 
+                timeRemainingForSpectator,
+                debate.Debater1UserId,
+                debate.Debater2UserId,
+                spectatorHasAlreadyVoted,
+                currentVotes1,
+                currentVotes2
             );
         }
         else if (string.IsNullOrEmpty(debate.Debater1ConnectionId) && debate.Debater1UserId != userId)
@@ -242,14 +252,23 @@ public class RoomStateService
         var debate = GetActiveDebate(roomId);
         if (debate == null || !debate.IsActive || debate.Debater1UserId == voterUserId || debate.Debater2UserId == voterUserId)
         {
-            // Can't vote for self or if not active debate
             return;
         }
-        debate.Votes[voterUserId] = votedForDebaterUserId; // Overwrites previous vote if any
 
-        int votes1 = debate.Votes.Count(v => v.Value == debate.Debater1UserId);
-        int votes2 = debate.Votes.Count(v => v.Value == debate.Debater2UserId);
-        await _hubContext.Clients.Group(roomId.ToString()).SendAsync("UpdateVotes", votes1, votes2);
+        if (debate.Votes.ContainsKey(voterUserId))
+        {
+            return;
+        }
+
+        if (debate.Votes.TryAdd(voterUserId, votedForDebaterUserId))
+        {
+            int votes1 = debate.Votes.Count(v => v.Value == debate.Debater1UserId);
+            int votes2 = debate.Votes.Count(v => v.Value == debate.Debater2UserId);
+            await _hubContext.Clients.Group(roomId.ToString()).SendAsync("UpdateVotes", votes1, votes2);
+        }
+        else
+        {
+        }
     }
 
     public async Task EndDebate(int roomId, string? explicitWinnerId = null, string? reason = null)
