@@ -20,13 +20,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         // Seed Rooms
         builder.Entity<Room>().HasData(
-            new Room { Id = 1, Name = "Politics Arena", GeneralTopic = "Political Discussions" },
-            new Room { Id = 2, Name = "Tech Sphere", GeneralTopic = "Technology and Future" },
-            new Room { Id = 3, Name = "Philosophy Hall", GeneralTopic = "Philosophical Debates" },
-            new Room { Id = 4, Name = "Pop Culture Corner", GeneralTopic = "Movies, Music, and Trends" }
+            new Room { Id = 1, Name = "Cultura Pop", GeneralTopic = "Film, musica, trends..." },
+            new Room { Id = 2, Name = "Tecnologia", GeneralTopic = "Il futuro della tecnologia" },
+            new Room { Id = 3, Name = "Filosofia", GeneralTopic = "Dibattiti filosofici" },
+            new Room { Id = 4, Name = "Politica", GeneralTopic = "Discussioni politiche" }
         );
-
-        // Seed Debate Topics (simple list, could be its own table)
-        // For this example, topics will be managed by RoomStateService
     }
 }

@@ -6,18 +6,12 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 @{
-    ViewData["Title"] = "Available Rooms";
+    ViewData["Title"] = "Stanze disponibili";
 }
 
 <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>@ViewData["Title"]</h2>
-        @if (SignInManager.IsSignedIn(User))
-        {
-            <a href="#" class="btn btn-success">
-                <i class="fas fa-plus me-2"></i>Create New Room
-            </a>
-        }
     </div>
 
     @if (!SignInManager.IsSignedIn(User))
@@ -25,7 +19,7 @@
         <div class="alert alert-warning d-flex align-items-center">
             <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
             <div>
-                You need to <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Login</a> to enter a room.
+                Devi effettuare il <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">login</a> per entrare in una stanza.
             </div>
         </div>
     }
@@ -40,15 +34,15 @@
                         <div class="card h-100">
                             <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">@room.Name</h5>
-                                <span class="badge rounded-pill bg-primary">@room.UserCount users</span>
+                                <span class="badge rounded-pill bg-primary">@room.UserCount utenti</span>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <h6 class="text-muted mb-2"><i class="fas fa-comments me-2"></i>Topic</h6>
+                                    <h6 class="text-muted mb-2"><i class="fas fa-comments me-2"></i>Argomento</h6>
                                     <p>@room.GeneralTopic</p>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small"><i class="fas fa-users me-1"></i> @room.UserCount/@(room.MaxUsers > 0 ? room.MaxUsers.ToString() : "∞") spots</span>
+                                    <span class="text-muted small"><i class="fas fa-users me-1"></i> @room.UserCount/@(room.MaxUsers > 0 ? room.MaxUsers.ToString() : "∞") posti</span>
                                     <div class="progress" style="height: 8px; width: 100px;">
                                         @{ 
                                             var percentage = room.MaxUsers > 0 ? (room.UserCount * 100 / room.MaxUsers) : 50;
@@ -61,7 +55,7 @@
                             </div>
                             <div class="card-footer bg-transparent border-top-0">
                                 <a class="btn btn-primary w-100" asp-page="/Stanza" asp-route-roomId="@room.Id">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Enter Room
+                                    <i class="fas fa-sign-in-alt me-2"></i>Entra
                                 </a>
                             </div>
                         </div>
@@ -74,8 +68,8 @@
             <div class="card shadow-sm">
                 <div class="card-body text-center p-5">
                     <i class="fas fa-door-closed fa-3x text-muted mb-3"></i>
-                    <h4>No rooms available at the moment</h4>
-                    <p class="text-muted">Be the first to create a debate room!</p>
+                    <h4>Nessuna stanza disponibile al momento</h4>
+                    <p class="text-muted">Crea la prima stanza di dibattito!</p>
                 </div>
             </div>
         }

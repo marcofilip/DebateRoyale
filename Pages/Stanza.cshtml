@@ -3,7 +3,7 @@
 @using System.Security.Claims
 
 @{
-    ViewData["Title"] = Model.CurrentRoom?.Name ?? "Debate Room";
+    ViewData["Title"] = Model.CurrentRoom?.Name ?? "Stanza di dibattito";
     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
@@ -17,10 +17,10 @@
         <div class="card shadow border-0 p-4">
             <div class="card-body">
                 <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>
-                <h4>Room not found</h4>
-                <p class="text-muted">The room you're looking for doesn't exist or has been closed.</p>
+                <h4>Stanza non trovata</h4>
+                <p class="text-muted">La stanza che cerchi non esiste o è stata chiusa.</p>
                 <a asp-page="/StanzeList" class="btn btn-primary mt-2">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Rooms List
+                    <i class="fas fa-arrow-left me-2"></i>Torna alla lista stanze
                 </a>
             </div>
         </div>
@@ -40,14 +40,14 @@ else
                 <div class="card-body">
                     <div id="debateStatus" class="alert alert-info d-flex align-items-center mb-4">
                         <i class="fas fa-hourglass-half me-2"></i>
-                        <div>Waiting for opponent...</div>
+                        <div>In attesa di un avversario...</div>
                     </div>
 
                     <div id="debateArea" style="display: none;">
                         <div class="card shadow-sm mb-4 border-0">
                             <div class="card-header bg-primary text-white">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h4 class="mb-0"><i class="fas fa-fire me-2"></i>Topic: <span id="debateTopic"></span></h4>
+                                    <h4 class="mb-0"><i class="fas fa-fire me-2"></i>Argomento: <span id="debateTopic"></span></h4>
                                     <div class="badge bg-light text-dark rounded-pill">
                                         <i class="fas fa-clock me-1"></i>
                                         <span id="timer">00:00</span>
@@ -74,22 +74,22 @@ else
                                 </div>
 
                                 <div id="chatBox" style="height: 350px; overflow-y: scroll;">
-                                    <!-- Messages will appear here -->
+                                    <!-- I messaggi appariranno qui -->
                                 </div>
                                 <div class="input-group mt-3" id="messageInputArea">
                                     <span class="input-group-text bg-transparent border-end-0">
                                         <i class="fas fa-comment-alt"></i>
                                     </span>
-                                    <input type="text" id="messageInput" class="form-control border-start-0" placeholder="Type your argument..." />
+                                    <input type="text" id="messageInput" class="form-control border-start-0" placeholder="Scrivi il tuo argomento..." />
                                     <button id="sendButton" class="btn btn-primary">
-                                        <i class="fas fa-paper-plane me-1"></i> Send
+                                        <i class="fas fa-paper-plane me-1"></i> Invia
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         <div id="voteArea" style="display:none;" class="text-center mb-4">
-                            <h5><i class="fas fa-vote-yea me-2"></i>Who is arguing better?</h5>
+                            <h5><i class="fas fa-vote-yea me-2"></i>Chi sta argomentando meglio?</h5>
                             <div class="row mt-3">
                                 <div class="col-6">
                                     <button id="voteDebater1" class="btn btn-outline-primary w-100">
@@ -97,7 +97,7 @@ else
                                         <span class="debater1-vote-name"></span>
                                     </button>
                                     <div class="mt-2">
-                                        <span id="debater1Votes" class="fw-bold">0</span> votes
+                                        <span id="debater1Votes" class="fw-bold">0</span> voti
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -106,7 +106,7 @@ else
                                         <span class="debater2-vote-name"></span>
                                     </button>
                                     <div class="mt-2">
-                                        <span id="debater2Votes" class="fw-bold">0</span> votes
+                                        <span id="debater2Votes" class="fw-bold">0</span> voti
                                     </div>
                                 </div>
                             </div>
@@ -115,19 +115,19 @@ else
 
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-transparent">
-                            <i class="fas fa-users me-2"></i> General Chat
+                            <i class="fas fa-users me-2"></i> Chat Generale
                         </div>
                         <div class="card-body">
                             <div id="chatMessagesNonDebate" style="height: 200px; overflow-y: scroll;">
-                                <!-- General chat messages when no debate is active -->
+                                <!-- Messaggi della chat generale quando non c'è un dibattito attivo -->
                             </div>
                             <div class="input-group mt-3" id="chatInputAreaNonDebate">
                                 <span class="input-group-text bg-transparent border-end-0">
                                     <i class="fas fa-comment"></i>
                                 </span>
-                                <input type="text" id="chatMessageInput" class="form-control border-start-0" placeholder="Type a message..." />
+                                <input type="text" id="chatMessageInput" class="form-control border-start-0" placeholder="Scrivi un messaggio..." />
                                 <button id="sendChatMessageButton" class="btn btn-info">
-                                    <i class="fas fa-paper-plane me-1"></i> Send
+                                    <i class="fas fa-paper-plane me-1"></i> Invia
                                 </button>
                             </div>
                         </div>
@@ -135,19 +135,19 @@ else
 
                     <div id="resultsArea" class="card shadow-sm mb-4" style="display:none;">
                         <div class="card-header bg-success text-white">
-                            <i class="fas fa-trophy me-2"></i> Debate Results
+                            <i class="fas fa-trophy me-2"></i> Risultati del dibattito
                         </div>
                         <div class="card-body">
                             <div class="text-center mb-4">
                                 <div class="winner-trophy mb-2">
                                     <i class="fas fa-award fa-3x text-warning"></i>
                                 </div>
-                                <h5>Winner: <span id="winnerName" class="fw-bold"></span></h5>
+                                <h5>Vincitore: <span id="winnerName" class="fw-bold"></span></h5>
                             </div>
                             
                             <div class="row mb-4">
                                 <div class="col-12">
-                                    <h6 class="text-center mb-3">Spectator Votes</h6>
+                                    <h6 class="text-center mb-3">Voti degli spettatori</h6>
                                     <div class="d-flex justify-content-center align-items-center">
                                         <div class="text-center me-4">
                                             <span class="debater1-vote-name fw-bold"></span>
@@ -162,12 +162,12 @@ else
                                 </div>
                             </div>
 
-                            <h6><i class="fas fa-robot me-2"></i>AI Analysis:</h6>
+                            <h6><i class="fas fa-robot me-2"></i>Analisi IA:</h6>
                             <div id="aiAnalysisResult" class="p-3 rounded"></div>
                             
                             <div class="text-center mt-4">
                                 <button id="readyForNewDebate" class="btn btn-success">
-                                    <i class="fas fa-redo me-2"></i>Ready for New Debate
+                                    <i class="fas fa-redo me-2"></i>Pronto per un nuovo dibattito
                                 </button>
                             </div>
                         </div>
@@ -179,29 +179,29 @@ else
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-transparent">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Participants</h5>
-                        <span id="connectionStatus" class="badge bg-secondary">Connecting...</span>
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Partecipanti</h5>
+                        <span id="connectionStatus" class="badge bg-secondary">Connessione...</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <ul id="participantsList" class="list-group list-group-flush">
-                        <!-- Participants will be listed here by SignalR -->
+                        <!-- I partecipanti saranno elencati qui da SignalR -->
                     </ul>
                 </div>
             </div>
             
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-transparent">
-                    <i class="fas fa-info-circle me-2"></i> Room Info
+                    <i class="fas fa-info-circle me-2"></i> Info Stanza
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            Topic
+                            Argomento
                             <span class="badge bg-primary rounded-pill">@Model.CurrentRoom.GeneralTopic</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            Room ID
+                            ID Stanza
                             <span class="badge bg-secondary rounded-pill">@Model.CurrentRoom.Id</span>
                         </li>
                     </ul>
