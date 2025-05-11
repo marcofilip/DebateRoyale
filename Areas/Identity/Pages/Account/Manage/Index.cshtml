@@ -20,6 +20,29 @@
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
+            <div class="mb-3">
+                <label asp-for="Input.SelectedAvatar" class="form-label"></label>
+                <div>
+                    @foreach (var avatarOption in Model.AvailableAvatars)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input type="radio" asp-for="Input.SelectedAvatar" value="@avatarOption.Value" id="avatar_@avatarOption.Value.Replace('.', '_')" class="form-check-input" />
+                            <label class="form-check-label" for="avatar_@avatarOption.Value.Replace('.', '_')">
+                                <img src="~/images/avatars/@avatarOption.Value" alt="@avatarOption.Text" width="50" height="50" class="rounded-circle me-2" />
+                                @avatarOption.Text
+                            </label>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="Input.SelectedAvatar" class="text-danger"></span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.CurrentAvatar))
+            {
+                <div class="mb-3">
+                    <p>Current Avatar:</p>
+                    <img src="~/images/avatars/@Model.CurrentAvatar" alt="Current Avatar" width="100" height="100" class="rounded-circle" />
+                </div>
+            }
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>
     </div>

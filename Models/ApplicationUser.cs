@@ -9,4 +9,7 @@ public class ApplicationUser : IdentityUser
 
     [PersonalData]
     public int Losses { get; set; } = 0;
+
+    [PersonalData]
+    public string? SelectedAvatar { get; set; }
 }

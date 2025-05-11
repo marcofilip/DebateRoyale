@@ -7,9 +7,13 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    var applicationUser = await UserManager.GetUserAsync(User);
+    var avatarPath = applicationUser?.SelectedAvatar ?? "default_avatar.png";
+
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-circle me-1"></i> @UserManager.GetUserName(User)
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="~/images/avatars/@avatarPath" alt="User Avatar" width="30" height="30" class="rounded-circle me-2" />
+            @applicationUser?.UserName
         </a>
         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
             <li>

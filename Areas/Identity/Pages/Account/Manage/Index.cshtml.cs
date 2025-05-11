@@ -6,10 +6,12 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using DebateRoyale.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
 {
@@ -31,6 +33,12 @@ namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
+
+        /// <summary>
+        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public string CurrentAvatar { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -59,7 +67,26 @@ namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Display(Name = "Choose Avatar")]
+            public string SelectedAvatar { get; set; }
         }
+
+        /// <summary>
+        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public List<SelectListItem> AvailableAvatars { get; } = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "avatar1.png", Text = "Babbo Natale" },
+            new SelectListItem { Value = "avatar2.png", Text = "Donna" },
+            new SelectListItem { Value = "avatar3.png", Text = "Uomo" },
+            new SelectListItem { Value = "default_avatar.png", Text = "Default" }
+        };
 
         private async Task LoadAsync(ApplicationUser user)
         {
@@ -67,10 +94,12 @@ namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            CurrentAvatar = user.SelectedAvatar ?? "default_avatar.png";
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                SelectedAvatar = user.SelectedAvatar ?? "default_avatar.png"
             };
         }
 
@@ -107,6 +136,17 @@ namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";
+                    return RedirectToPage();
+                }
+            }
+
+            if (Input.SelectedAvatar != user.SelectedAvatar)
+            {
+                user.SelectedAvatar = Input.SelectedAvatar;
+                var updateAvatarResult = await _userManager.UpdateAsync(user);
+                if (!updateAvatarResult.Succeeded)
+                {
+                    StatusMessage = "Error: Unexpected error when trying to set avatar.";
                     return RedirectToPage();
                 }
             }

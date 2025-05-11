@@ -293,7 +293,9 @@ connection.on(
         debater2Name, // Nome del dibattente 2 dal server
         serverDebater1Id, // ID del dibattente 1 dal server
         serverDebater2Id, // ID del dibattente 2 dal server
-        durationSeconds
+        durationSeconds,
+        serverDebater1Avatar, // nuovo parametro: avatar di debater 1
+        serverDebater2Avatar // nuovo parametro: avatar di debater 2
     ) => {
         console.log(
             `DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`
@@ -383,6 +385,16 @@ connection.on(
         // Resetta i conteggi dei voti visualizzati a 0 per un nuovo dibattito
         if (debater1VotesSpan) debater1VotesSpan.textContent = "0";
         if (debater2VotesSpan) debater2VotesSpan.textContent = "0";
+
+        // Imposta avatar dei debater
+        const debater1AvatarImg = document.getElementById("debater1Avatar");
+        if (debater1AvatarImg && serverDebater1Avatar) {
+            debater1AvatarImg.src = `/images/avatars/${serverDebater1Avatar}`;
+        }
+        const debater2AvatarImg = document.getElementById("debater2Avatar");
+        if (debater2AvatarImg && serverDebater2Avatar) {
+            debater2AvatarImg.src = `/images/avatars/${serverDebater2Avatar}`;
+        }
 
         // Imposta il timer
         if (countdownInterval) clearInterval(countdownInterval);

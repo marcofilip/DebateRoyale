@@ -19,6 +19,8 @@ public class StanzaModel : PageModel
     }
 
     public Room? CurrentRoom { get; private set; }
+    public string? Debater1Avatar { get; set; }
+    public string? Debater2Avatar { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int roomId)
     {

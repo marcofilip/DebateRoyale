@@ -25,4 +25,8 @@
     <PackageReference Include="Mscc.GenerativeAI" Version="2.5.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\avatars\" />
+  </ItemGroup>
+
 </Project>
