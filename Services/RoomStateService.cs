@@ -289,11 +289,11 @@ public class RoomStateService
             try
             {
                 // Prompt for Gemini
-                string prompt = $"Analyze the following debate transcript. The topic was: \"{debate.SpecificTopic}\". " +
-                                $"Debater1 is {debate.Debater1Username}. Debater2 is {debate.Debater2Username}. " +
-                                $"Determine which debater presented stronger arguments and was more persuasive. " +
-                                $"Provide a brief analysis (2-3 sentences) and then state the winner clearly by username (e.g., 'Winner: {debate.Debater1Username}' or 'Winner: {debate.Debater2Username}'). " +
-                                $"If it's a clear tie, state 'Winner: Tie'.\n\nTranscript:\n{transcriptText}";
+                string prompt = $"Analizza la seguente trascrizione del dibattito. L'argomento era: \"{debate.SpecificTopic}\". " +
+                                $"Il Dibattente1 è {debate.Debater1Username}. Il Dibattente2 è {debate.Debater2Username}. " +
+                                $"Determina quale dibattente ha presentato argomentazioni più forti ed è stato più persuasivo. " +
+                                $"Fornisci una breve analisi (2-3 frasi) e poi indica chiaramente il vincitore tramite username (ad esempio, 'Vincitore: {debate.Debater1Username}' oppure 'Vincitore: {debate.Debater2Username}'). " +
+                                $"Se è un pareggio evidente, scrivi 'Vincitore: Pareggio'.\n\nTrascrizione:\n{transcriptText}";
 
                 aiAnalysis = await _geminiService.GenerateContentAsync(prompt);
 
