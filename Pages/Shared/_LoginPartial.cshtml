@@ -13,15 +13,23 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
             <li>
-                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gestisci">
                     <i class="fas fa-cog me-2"></i> Impostazioni
                 </a>
             </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-page="/Users">
+                            <i class="fas fa-users-cog me-1"></i> Gestione Utenti
+                        </a>
+                    </li>
+                }
             <li><hr class="dropdown-divider"></li>
             <li>
                 <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
                     <button id="logout" type="submit" class="dropdown-item">
-                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        <i class="fas fa-sign-out-alt me-2"></i> Esci
                     </button>
                 </form>
             </li>
