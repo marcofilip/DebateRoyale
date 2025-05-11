@@ -116,8 +116,9 @@ connection.on("ParticipantLeft", (username) => {
 
 connection.on("SpectatorJoined", (debater1, debater2) => {
     console.log("Joined as spectator.");
-    debateStatusDiv.textContent = `Waiting for debate between ${debater1 || "Debater 1"
-        } and ${debater2 || "Debater 2"} to start.`;
+    debateStatusDiv.textContent = `Waiting for debate between ${
+        debater1 || "Debater 1"
+    } and ${debater2 || "Debater 2"} to start.`;
 });
 
 connection.on(
@@ -132,9 +133,11 @@ connection.on(
         serverDebater2Id, // ID del dibattente 2 dal server
         spectatorHasAlreadyVotedParam, // boolean se lo spettatore ha già votato
         currentVotes1, // Conteggio voti attuale per dibattente 1
-        currentVotes2  // Conteggio voti attuale per dibattente 2
+        currentVotes2 // Conteggio voti attuale per dibattente 2
     ) => {
-        console.log(`DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`);
+        console.log(
+            `DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`
+        );
 
         clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
         // Poi la nascondiamo di nuovo per mostrare il dibattito
@@ -144,8 +147,11 @@ connection.on(
         resultsAreaDiv.style.display = "none";
 
         // Nascondi la chat non-dibattito perché siamo in un dibattito attivo
-        if (chatMessagesNonDebateDiv) chatMessagesNonDebateDiv.style.display = "none";
-        const chatInputNonDebate = document.getElementById("chatInputAreaNonDebate");
+        if (chatMessagesNonDebateDiv)
+            chatMessagesNonDebateDiv.style.display = "none";
+        const chatInputNonDebate = document.getElementById(
+            "chatInputAreaNonDebate"
+        );
         if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
         // Imposta informazioni del dibattito
@@ -158,7 +164,9 @@ connection.on(
         debater2Global = debater2Name;
         debater1UserIdGlobal = serverDebater1Id;
         debater2UserIdGlobal = serverDebater2Id;
-        console.log(`DebateAlreadyInProgress: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`);
+        console.log(
+            `DebateAlreadyInProgress: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`
+        );
 
         // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
@@ -185,7 +193,10 @@ connection.on(
         // Gestisci l'area di voto per lo spettatore
         if (voteAreaDiv) {
             // Solo gli spettatori vedono l'area di voto
-            if (currentUserId !== serverDebater1Id && currentUserId !== serverDebater2Id) {
+            if (
+                currentUserId !== serverDebater1Id &&
+                currentUserId !== serverDebater2Id
+            ) {
                 voteAreaDiv.style.display = "block";
                 hasVoted = spectatorHasAlreadyVotedParam; // Imposta se lo spettatore ha già votato
                 if (voteDebater1Button) voteDebater1Button.disabled = hasVoted;
@@ -219,13 +230,15 @@ connection.on(
     "DebateStarted",
     (
         topic,
-        debater1Name,     // Nome del dibattente 1 dal server
-        debater2Name,     // Nome del dibattente 2 dal server
+        debater1Name, // Nome del dibattente 1 dal server
+        debater2Name, // Nome del dibattente 2 dal server
         serverDebater1Id, // ID del dibattente 1 dal server
         serverDebater2Id, // ID del dibattente 2 dal server
         durationSeconds
     ) => {
-        console.log(`DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`);
+        console.log(
+            `DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`
+        );
 
         clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
         // Poi la nascondiamo di nuovo per mostrare il dibattito
@@ -235,8 +248,11 @@ connection.on(
         resultsAreaDiv.style.display = "none";
 
         // Nascondi la chat non-dibattito perché un dibattito è iniziato
-        if (chatMessagesNonDebateDiv) chatMessagesNonDebateDiv.style.display = "none";
-        const chatInputNonDebate = document.getElementById("chatInputAreaNonDebate");
+        if (chatMessagesNonDebateDiv)
+            chatMessagesNonDebateDiv.style.display = "none";
+        const chatInputNonDebate = document.getElementById(
+            "chatInputAreaNonDebate"
+        );
         if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
         // Imposta informazioni del dibattito
@@ -249,8 +265,9 @@ connection.on(
         debater2Global = debater2Name;
         debater1UserIdGlobal = serverDebater1Id;
         debater2UserIdGlobal = serverDebater2Id;
-        console.log(`DebateStarted: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`);
-
+        console.log(
+            `DebateStarted: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`
+        );
 
         // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
@@ -263,7 +280,10 @@ connection.on(
         chatBox.innerHTML = ""; // Pulisci la chatBox per il nuovo dibattito
 
         // Gestisci la visibilità dell'input del dibattito e dell'area di voto
-        if (currentUserId === serverDebater1Id || currentUserId === serverDebater2Id) {
+        if (
+            currentUserId === serverDebater1Id ||
+            currentUserId === serverDebater2Id
+        ) {
             // L'utente è un dibattente
             if (messageInputArea) messageInputArea.style.display = "flex";
             if (voteAreaDiv) voteAreaDiv.style.display = "none";
@@ -299,53 +319,158 @@ connection.on(
 );
 
 if (voteDebater1Button) {
-    voteDebater1Button.addEventListener("click", event => {
+    voteDebater1Button.addEventListener("click", (event) => {
+        console.log("Vote for Debater 1 button CLICKED"); // LOG 1
         event.preventDefault();
         if (hasVoted) {
-            addMessageToChat(null, "You have already voted in this debate.", true);
+            console.log("Vote attempt: Already voted."); // LOG 2
+            addMessageToChat(
+                null,
+                "You have already voted in this debate.",
+                true
+            );
             return;
         }
-        if (debater1UserIdGlobal) {
-            const confirmationMessage = "Are you sure you want to vote for " + (debater1Global || "Debater 1") + "? " + // Aggiunto fallback per nome
+        if (debater1UserIdGlobal && debater1Global) {
+            console.log(
+                "Vote attempt: debater1UserIdGlobal is set:",
+                debater1UserIdGlobal
+            ); // LOG 3
+            const confirmationMessage =
+                "Are you sure you want to vote for " +
+                (debater1Global || "Debater 1") +
+                "? " +
                 "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
             if (confirm(confirmationMessage)) {
-                connection.invoke("CastVote", roomId, debater1UserIdGlobal)
+                console.log("Vote confirmed by user for Debater 1.");
+                voteDebater1Button.disabled = true;
+                voteDebater2Button.disabled = true;
+                connection
+                    .invoke("CastVote", roomId, debater1UserIdGlobal)
                     .then(() => {
+                        console.log(
+                            "CastVote for Debater 1 successful (then block)."
+                        );
                         hasVoted = true;
-                        voteDebater1Button.disabled = true;
-                        voteDebater2Button.disabled = true;
-                        addMessageToChat(null, `You voted for ${debater1Global || "Debater 1"}.`, true);
+                        addMessageToChat(
+                            null,
+                            `You voted for ${debater1Global}.`,
+                            true
+                        );
                     })
-                    .catch(err => { console.error("SignalR invoke error on 'NomeMetodoHub':", err.toString()); });
+                    .catch((err) => {
+                        console.error(
+                            `Error invoking 'CastVote' for ${debater1Global}:`,
+                            err.toString()
+                        );
+                        let userErrorMessage =
+                            "An error occurred while trying to cast your vote. Please try again.";
+                        addMessageToChat(null, userErrorMessage, true);
+                        if (!hasVoted) {
+                            voteDebater1Button.disabled = false;
+                            voteDebater2Button.disabled = false;
+                        }
+                    });
             }
         } else {
-            console.error("Cannot vote for Debater 1: debater1UserIdGlobal is not set.");
+            console.error(
+                "Cannot vote for Debater 1: debater1UserIdGlobal or debater1Global is not set.",
+                debater1UserIdGlobal,
+                debater1Global
+            ); // LOG 8
+            addMessageToChat(
+                null,
+                "Cannot vote: Debater information is missing.",
+                true
+            );
         }
     });
 }
 
 if (voteDebater2Button) {
-    voteDebater2Button.addEventListener("click", event => {
+    voteDebater2Button.addEventListener("click", (event) => {
+        console.log("Vote for Debater 2 button CLICKED"); // LOG 1
         event.preventDefault();
+
         if (hasVoted) {
-            addMessageToChat(null, "You have already voted in this debate.", true);
+            console.log("Vote attempt: Already voted."); // LOG 2
+            addMessageToChat(
+                null,
+                "You have already voted in this debate.",
+                true
+            );
             return;
         }
-        if (debater2UserIdGlobal) {
-            const confirmationMessage = "Are you sure you want to vote for " + (debater2Global || "Debater 2") + "? " +
+
+        if (debater2UserIdGlobal && debater2Global) {
+            // Aggiunto check per debater2Global
+            console.log(
+                "Vote attempt: debater2UserIdGlobal is set:",
+                debater2UserIdGlobal
+            ); // LOG 3
+            const confirmationMessage =
+                "Are you sure you want to vote for " +
+                debater2Global +
+                "? " +
                 "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
+
             if (confirm(confirmationMessage)) {
-                connection.invoke("CastVote", roomId, debater2UserIdGlobal)
+                // <<<< LA CHIAMATA A INVOKE DEVE ESSERE QUI DENTRO
+                console.log("Vote confirmed by user for Debater 2."); // LOG 4
+                voteDebater1Button.disabled = true;
+                voteDebater2Button.disabled = true;
+
+                connection
+                    .invoke("CastVote", roomId, debater2UserIdGlobal)
                     .then(() => {
+                        console.log(
+                            "CastVote for Debater 2 successful (then block)."
+                        ); // LOG 5
                         hasVoted = true;
-                        voteDebater1Button.disabled = true;
-                        voteDebater2Button.disabled = true;
-                        addMessageToChat(null, `You voted for ${debater2Global || "Debater 2"}.`, true);
+                        // voteDebater1Button.disabled = true;
+                        // voteDebater2Button.disabled = true;
+                        addMessageToChat(
+                            null,
+                            `You voted for ${debater2Global}.`,
+                            true
+                        );
                     })
-                    .catch(err => { console.error("SignalR invoke error on 'NomeMetodoHub':", err.toString()); });
+                    .catch((err) => {
+                        console.error(
+                            `Error invoking 'CastVote' for ${debater2Global}:`,
+                            err.toString()
+                        ); // LOG 6
+                        let userErrorMessage =
+                            "An error occurred while trying to cast your vote. Please try again.";
+                        addMessageToChat(null, userErrorMessage, true);
+                        if (!hasVoted) {
+                            voteDebater1Button.disabled = false;
+                            voteDebater2Button.disabled = false;
+                        }
+                        addMessageToChat(
+                            null,
+                            "An error occurred while trying to cast your vote. Please try again.",
+                            true
+                        );
+                        if (!hasVoted) {
+                            voteDebater1Button.disabled = false;
+                            voteDebater2Button.disabled = false;
+                        }
+                    });
+            } else {
+                console.log("Vote for Debater 2 cancelled by user."); // LOG 7
             }
         } else {
-            console.error("Cannot vote for Debater 2: debater2UserIdGlobal is not set.");
+            console.error(
+                "Cannot vote for Debater 2: debater2UserIdGlobal or debater2Global is not set.",
+                debater2UserIdGlobal,
+                debater2Global
+            ); // LOG 8
+            addMessageToChat(
+                null,
+                "Cannot vote: Debater information is missing.",
+                true
+            );
         }
     });
 }
@@ -439,44 +564,10 @@ if (chatMessageInput) {
     });
 }
 
-if (voteDebater1Button) {
-    voteDebater1Button.addEventListener("click", (event) => {
-        if (debater1UserIdGlobal) {
-            connection
-                .invoke("CastVote", roomId, debater1UserIdGlobal)
-                .catch((err) => console.error(err.toString()));
-            voteDebater1Button.disabled = true;
-            voteDebater2Button.disabled = true;
-            addMessageToChat(null, `You voted for ${debater1Global}.`, true);
-        }
-        event.preventDefault();
-    });
-}
-
-if (voteDebater2Button) {
-    voteDebater2Button.addEventListener("click", (event) => {
-        if (debater2UserIdGlobal) {
-            connection
-                .invoke("CastVote", roomId, debater2UserIdGlobal)
-                .catch((err) => console.error(err.toString()));
-            voteDebater1Button.disabled = true;
-            voteDebater2Button.disabled = true;
-            addMessageToChat(null, `You voted for ${debater2Global}.`, true);
-        }
-        event.preventDefault();
-    });
-}
-
 if (readyForNewDebateButton) {
     readyForNewDebateButton.addEventListener("click", async (event) => {
         event.preventDefault();
         clearDebateUI();
-        // Re-join logic might be needed if connection dropped or to signal readiness explicitly
-        // For simplicity, just clearing UI. The server's RoomStateService handles new debate setup on user join.
-        // A "Ready" button on client could invoke a "SignalReadiness" on hub.
-        // For now, simply re-joining the room via a full page refresh or navigating away and back
-        // would be the simplest way to trigger the join logic again if the server has fully reset the room state.
-        // Or, we can re-invoke JoinRoom if the connection is still alive.
         if (connection.state === signalR.HubConnectionState.Connected) {
             try {
                 await connection.invoke("JoinRoom", roomId); // This will re-trigger the server's join logic
