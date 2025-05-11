@@ -20,17 +20,14 @@ public class StanzeListModel : PageModel
         _roomStateService = roomStateService;
     }
 
-    public IList<RoomViewModel> Rooms { get; set; } = new List<RoomViewModel>();
-
-    public class RoomViewModel
+    public IList<RoomViewModel> Rooms { get; set; } = new List<RoomViewModel>();    public class RoomViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = "Default Room Name";
         public string GeneralTopic { get; set; } = "General Discussion";
         public int UserCount { get; set; } = 0;
-    }
-
-    public async Task OnGetAsync()
+        public int MaxUsers { get; set; } = 0;
+    }    public async Task OnGetAsync()
     {
         var allRoomsFromDb = await _context.Rooms.ToListAsync();
         var activeUserCounts = _roomStateService.GetActiveUserCountsPerRoom();
@@ -40,6 +37,7 @@ public class StanzeListModel : PageModel
             Id = room.Id,
             Name = room.Name,
             GeneralTopic = room.GeneralTopic,
+            MaxUsers = room.MaxUsers,
             UserCount = activeUserCounts.TryGetValue(room.Id, out var count) ? count : 0
         }).ToList();
     }

@@ -9,42 +9,75 @@
     ViewData["Title"] = "Available Rooms";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <a href="#" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Create New Room
+            </a>
+        }
+    </div>
 
-@if (!SignInManager.IsSignedIn(User))
-{
-    <p class="alert alert-warning">You need to <a asp-area="Identity" asp-page="/Account/Login">Login</a> to enter a room.</p>
-}
-else
-{
-    @if (Model.Rooms.Any())
+    @if (!SignInManager.IsSignedIn(User))
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Room Name</th>
-                    <th>General Topic</th>
-                    <th>Users Online</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var room in Model.Rooms)
-                {
-                    <tr>
-                        <td>@room.Name</td>
-                        <td>@room.GeneralTopic</td>
-                        <td>@room.UserCount</td>
-                        <td>
-                            <a class="btn btn-primary" asp-page="/Stanza" asp-route-roomId="@room.Id">Enter Room</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="alert alert-warning d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+            <div>
+                You need to <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Login</a> to enter a room.
+            </div>
+        </div>
     }
     else
     {
-        <p>No rooms available at the moment.</p>
+        @if (Model.Rooms.Any())
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var room in Model.Rooms)
+                {
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">@room.Name</h5>
+                                <span class="badge rounded-pill bg-primary">@room.UserCount users</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2"><i class="fas fa-comments me-2"></i>Topic</h6>
+                                    <p>@room.GeneralTopic</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small"><i class="fas fa-users me-1"></i> @room.UserCount/@(room.MaxUsers > 0 ? room.MaxUsers.ToString() : "∞") spots</span>
+                                    <div class="progress" style="height: 8px; width: 100px;">
+                                        @{ 
+                                            var percentage = room.MaxUsers > 0 ? (room.UserCount * 100 / room.MaxUsers) : 50;
+                                        }
+                                        <div class="progress-bar" role="progressbar" style="width: @percentage%;" 
+                                            aria-valuenow="@room.UserCount" aria-valuemin="0" aria-valuemax="@room.MaxUsers">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a class="btn btn-primary w-100" asp-page="/Stanza" asp-route-roomId="@room.Id">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Enter Room
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-door-closed fa-3x text-muted mb-3"></i>
+                    <h4>No rooms available at the moment</h4>
+                    <p class="text-muted">Be the first to create a debate room!</p>
+                </div>
+            </div>
+        }
     }
-}
+</div>

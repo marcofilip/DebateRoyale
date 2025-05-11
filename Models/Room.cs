@@ -12,6 +12,8 @@ public class Room
 
     [StringLength(200)]
     public string GeneralTopic { get; set; } = "General Discussion";
+    
+    public int MaxUsers { get; set; } = 0;
 
     public ICollection<Debate> Debates { get; set; } = new List<Debate>();
 }

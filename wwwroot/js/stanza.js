@@ -43,7 +43,7 @@ const chatMessagesNonDebateDiv = document.getElementById(
 const chatMessageInput = document.getElementById("chatMessageInput");
 const sendChatMessageButton = document.getElementById("sendChatMessageButton");
 
-function clearDebateUI() {
+function clearDebateUI(updateStatusDiv = true) {
     debateAreaDiv.style.display = "none";
     resultsAreaDiv.style.display = "none";
     voteAreaDiv.style.display = "none";
@@ -56,8 +56,12 @@ function clearDebateUI() {
     debater1VotesSpan.textContent = "0";
     debater2VotesSpan.textContent = "0";
     if (countdownInterval) clearInterval(countdownInterval);
-    debateStatusDiv.textContent = "Waiting for opponent...";
-    debateStatusDiv.style.display = "block";
+
+    // Gestisci il div di stato solo se richiesto
+    if (updateStatusDiv) {
+        debateStatusDiv.textContent = "Waiting for opponent...";
+        debateStatusDiv.style.display = "block";
+    }
 
     // Show general chat
     chatMessagesNonDebateDiv.style.display = "block";
@@ -67,21 +71,74 @@ function clearDebateUI() {
 function addMessageToChat(user, message, isSystem = false) {
     const entry = document.createElement("div");
     entry.classList.add("message-entry");
+
     if (isSystem) {
         entry.classList.add("system-message");
         entry.innerHTML = `<em>${message}</em>`;
     } else {
-        entry.innerHTML = `<strong>${user}:</strong> ${message}`;
+        // Controlla se il messaggio è dell'utente corrente
+        const isCurrentUser = user === getUsernameFromId(currentUserId);
+
+        if (isCurrentUser) {
+            entry.classList.add("me");
+            entry.innerHTML = `${message}`;
+        } else {
+            entry.classList.add("other");
+            entry.innerHTML = `<strong>${user}</strong><div class="message-text">${message}</div>`;
+        }
     }
+
     chatBox.appendChild(entry);
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Animazione di scrolling fluido
+    chatBox.scrollTo({
+        top: chatBox.scrollHeight,
+        behavior: "smooth",
+    });
 }
 
 function addMessageToNonDebateChat(user, message) {
     const entry = document.createElement("div");
-    entry.innerHTML = `<strong>${user}:</strong> ${message}`;
+    entry.classList.add("chat-message");
+
+    // Controlla se il messaggio è dell'utente corrente
+    const isCurrentUser = user === getUsernameFromId(currentUserId);
+
+    if (isCurrentUser) {
+        entry.classList.add("me");
+        entry.innerHTML = `<div class="message-bubble">${message}</div>`;
+    } else {
+        entry.classList.add("other");
+        entry.innerHTML = `<strong>${user}</strong><div class="message-bubble">${message}</div>`;
+    }
+
     chatMessagesNonDebateDiv.appendChild(entry);
-    chatMessagesNonDebateDiv.scrollTop = chatMessagesNonDebateDiv.scrollHeight;
+
+    // Animazione di scrolling fluido
+    chatMessagesNonDebateDiv.scrollTo({
+        top: chatMessagesNonDebateDiv.scrollHeight,
+        behavior: "smooth",
+    });
+}
+
+// Funzione helper per ottenere il nome utente dall'id
+function getUsernameFromId(userId) {
+    // Cerchiamo nei partecipanti
+    const participantElement = document.querySelector(
+        `#participantsList li[data-user-id="${userId}"]`
+    );
+    if (participantElement) {
+        return participantElement.textContent.trim();
+    }
+
+    // Se non trovato tra i partecipanti, controllare i debaters
+    if (userId === debater1UserIdGlobal) {
+        return debater1Global;
+    } else if (userId === debater2UserIdGlobal) {
+        return debater2Global;
+    }
+
+    return "Unknown User";
 }
 
 connection.on("JoinedRoomSuccess", (message) => {
@@ -139,10 +196,12 @@ connection.on(
             `DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`
         );
 
-        clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
-        // Poi la nascondiamo di nuovo per mostrare il dibattito
-
+        // Prima nascondiamo il div di stato per evitare il flash del messaggio
         debateStatusDiv.style.display = "none";
+
+        // Poi pulisce il resto della UI
+        clearDebateUI(false); // Passa false per non modificare il div di stato
+
         debateAreaDiv.style.display = "block"; // Mostra l'area principale del dibattito
         resultsAreaDiv.style.display = "none";
 
@@ -240,14 +299,37 @@ connection.on(
             `DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`
         );
 
-        clearDebateUI(); // Pulisce la UI e mostra la chat non-dibattito di default
-        // Poi la nascondiamo di nuovo per mostrare il dibattito
+        const statusDivFromDom = document.getElementById("debateStatus");
+        console.log(
+            "DEBATESTARTED: Is global debateStatusDiv the same as freshly fetched one?",
+            debateStatusDiv === statusDivFromDom
+        );
+        console.log("DEBATESTARTED: Global debateStatusDiv:", debateStatusDiv);
+        console.log(
+            "DEBATESTARTED: Freshly fetched debateStatusDiv:",
+            statusDivFromDom
+        );
 
-        debateStatusDiv.style.display = "none";
-        debateAreaDiv.style.display = "block"; // Mostra l'area principale del dibattito
-        resultsAreaDiv.style.display = "none";
+        if (statusDivFromDom) {
+            // Usa la versione appena recuperata per il test
+            console.log("DEBATESTARTED: Attempting to hide statusDivFromDom");
+            statusDivFromDom.style.display = "none";
+            console.log(
+                "DEBATESTARTED: statusDivFromDom.style.display is now:",
+                statusDivFromDom.style.display
+            );
+        } else {
+            console.error(
+                "DEBATESTARTED: Could not find element with ID 'debateStatus' in DOM!"
+            );
+        }
 
-        // Nascondi la chat non-dibattito perché un dibattito è iniziato
+        // Poi pulisce il resto della UI
+        clearDebateUI(false); // Passa false per non modificare il div di stato
+
+        if (debateAreaDiv) debateAreaDiv.style.display = "block";
+        if (resultsAreaDiv) resultsAreaDiv.style.display = "none";
+
         if (chatMessagesNonDebateDiv)
             chatMessagesNonDebateDiv.style.display = "none";
         const chatInputNonDebate = document.getElementById(
@@ -315,6 +397,16 @@ connection.on(
                 // Il server invierà "DebateEnded"
             }
         }, 1000);
+
+        const finalStatusDiv = document.getElementById("debateStatus");
+        if (finalStatusDiv) {
+            console.log(
+                "DEBATESTARTED END: finalStatusDiv.style.display is:",
+                finalStatusDiv.style.display
+            );
+        } else {
+            console.error("DEBATESTARTED END: finalStatusDiv is null!");
+        }
     }
 );
 
@@ -403,7 +495,6 @@ if (voteDebater2Button) {
         }
 
         if (debater2UserIdGlobal && debater2Global) {
-            // Aggiunto check per debater2Global
             console.log(
                 "Vote attempt: debater2UserIdGlobal is set:",
                 debater2UserIdGlobal
@@ -415,7 +506,7 @@ if (voteDebater2Button) {
                 "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
 
             if (confirm(confirmationMessage)) {
-                // <<<< LA CHIAMATA A INVOKE DEVE ESSERE QUI DENTRO
+                // INVOKE SOLO SE CONFERMATO
                 console.log("Vote confirmed by user for Debater 2."); // LOG 4
                 voteDebater1Button.disabled = true;
                 voteDebater2Button.disabled = true;
@@ -427,8 +518,6 @@ if (voteDebater2Button) {
                             "CastVote for Debater 2 successful (then block)."
                         ); // LOG 5
                         hasVoted = true;
-                        // voteDebater1Button.disabled = true;
-                        // voteDebater2Button.disabled = true;
                         addMessageToChat(
                             null,
                             `You voted for ${debater2Global}.`,
@@ -447,18 +536,10 @@ if (voteDebater2Button) {
                             voteDebater1Button.disabled = false;
                             voteDebater2Button.disabled = false;
                         }
-                        addMessageToChat(
-                            null,
-                            "An error occurred while trying to cast your vote. Please try again.",
-                            true
-                        );
-                        if (!hasVoted) {
-                            voteDebater1Button.disabled = false;
-                            voteDebater2Button.disabled = false;
-                        }
                     });
             } else {
                 console.log("Vote for Debater 2 cancelled by user."); // LOG 7
+                // NON fare nulla se l'utente annulla, i pulsanti rimangono abilitati
             }
         } else {
             console.error(
@@ -634,30 +715,7 @@ async function start() {
     }
 }
 
-connection.onclose(async () => {
-    console.log("SignalR Connection Closed.");
-    connectionStatusP.textContent =
-        "Connection lost. Attempting to reconnect...";
-    connectionStatusP.className = "text-danger";
-    await start(); // Attempt to reconnect
-});
-
-// Alla fine del file stanza.js
-if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
-    start(); // Chiama start se roomId è valido
-} else {
-    // Logica di errore se roomId non è valido al momento del caricamento iniziale dello script
-    console.error(
-        "Initial script load: Room ID is not defined or invalid. Cannot initiate start(). Value:",
-        roomId
-    );
-    const statusP = document.getElementById("connectionStatus");
-    if (statusP) {
-        statusP.textContent = "Error: Room ID configuration is missing.";
-        statusP.className = "text-danger";
-    }
-}
-
+// SOLO UN connection.onclose !!
 connection.onclose(async () => {
     console.log("SignalR Connection Closed. Attempting to reconnect...");
     if (connectionStatusP) {
@@ -668,8 +726,6 @@ connection.onclose(async () => {
     // Attendi un po' prima di tentare la riconnessione
     await new Promise((resolve) => setTimeout(resolve, 5000));
     // Assicurati che start() venga chiamata solo se roomId è ancora valido.
-    // Se l'ID della stanza dipendesse da uno stato che può cambiare,
-    // questa logica di riconnessione potrebbe aver bisogno di più intelligenza.
     if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
         await start();
     } else {
@@ -682,3 +738,19 @@ connection.onclose(async () => {
         }
     }
 });
+
+// Chiamata iniziale a start()
+if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
+    start(); // Chiama start se roomId è valido
+} else {
+    // Logica di errore se roomId non è valido al momento del caricamento iniziale dello script
+    console.error(
+        "Initial script load: Room ID is not defined or invalid. Cannot initiate start(). Value:",
+        roomId
+    );
+    if (connectionStatusP) {
+        connectionStatusP.textContent =
+            "Error: Room ID configuration is missing.";
+        connectionStatusP.className = "text-danger";
+    }
+}

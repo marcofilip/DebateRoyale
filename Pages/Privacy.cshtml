@@ -3,6 +3,107 @@
 @{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="privacy-header text-center mb-5">
+    <div class="privacy-icon mb-3">
+        <i class="fas fa-shield-alt fa-3x text-primary"></i>
+    </div>
+    <h1 class="display-4 mb-3">@ViewData["Title"]</h1>
+    <p class="lead text-muted">La tua privacy è importante per noi</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h2 class="h4 mb-4"><i class="fas fa-info-circle me-2 text-primary"></i>Informativa sulla privacy</h2>
+                
+                <p>DebateRoyale si impegna a proteggere la tua privacy. Questa informativa descrive come raccogliamo, utilizziamo e proteggiamo le tue informazioni quando utilizzi il nostro servizio.</p>
+
+                <h3 class="h5 mt-4 mb-3"><i class="fas fa-database me-2 text-primary"></i>Dati raccolti</h3>
+                <p>Raccogliamo i seguenti dati personali:</p>
+                <ul>
+                    <li>Indirizzo email</li>
+                    <li>Nome utente</li>
+                    <li>Contenuti dei dibattiti a cui partecipi</li>
+                </ul>
+
+                <h3 class="h5 mt-4 mb-3"><i class="fas fa-user-shield me-2 text-primary"></i>Utilizzo dei dati</h3>
+                <p>Utilizziamo i tuoi dati personali per:</p>
+                <ul>
+                    <li>Fornire e migliorare il nostro servizio</li>
+                    <li>Gestire il tuo account</li>
+                    <li>Facilitare i dibattiti tra utenti</li>
+                    <li>Analizzare il comportamento degli utenti per migliorare l'esperienza</li>
+                </ul>
+
+                <h3 class="h5 mt-4 mb-3"><i class="fas fa-lock me-2 text-primary"></i>Sicurezza dei dati</h3>
+                <p>La sicurezza dei tuoi dati è importante per noi. Adottiamo misure appropriate per proteggere i tuoi dati personali da accessi non autorizzati, alterazione, divulgazione o distruzione.</p>
+
+                <h3 class="h5 mt-4 mb-3"><i class="fas fa-cookie me-2 text-primary"></i>Cookie</h3>
+                <p>Utilizziamo cookie e tecnologie simili per migliorare l'esperienza utente e analizzare l'uso del nostro servizio.</p>
+
+                <h3 class="h5 mt-4 mb-3"><i class="fas fa-envelope me-2 text-primary"></i>Contattaci</h3>
+                <p>Per domande o preoccupazioni sulla nostra informativa sulla privacy, contattaci a: privacy@debateroyale.com</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="#" class="btn btn-outline-primary">
+                <i class="fas fa-file-download me-2"></i>Scarica l'informativa completa (PDF)
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .privacy-header {
+        padding: 3rem 0;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(120deg, rgba(245,247,250,1) 0%, rgba(231,237,245,1) 100%);
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .privacy-header::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background-color: rgba(66, 103, 178, 0.1);
+        z-index: 0;
+        animation: floatBubble 8s ease-in-out infinite;
+    }
+    
+    .privacy-header::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        left: -80px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background-color: rgba(66, 103, 178, 0.05);
+        z-index: 0;
+        animation: floatBubble 12s ease-in-out infinite reverse;
+    }
+    
+    .privacy-icon {
+        position: relative;
+        z-index: 1;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background-color: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+    }
+</style>
