@@ -26,7 +26,7 @@ Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula u
 -   **Database:** SQLite
 -   **ORM:** Entity Framework Core 6.0.x
 -   **Autenticazione:** ASP.NET Core Identity
--   **Intelligenza Artificiale:** Google Gemini API (via chiamate HTTP dirette)
+-   **Intelligenza Artificiale:** Google Gemini API (via libreria `Mscc.GenerativeAI`)
 -   **Real-time:** SignalR
 
 ## 📋 Prerequisiti
