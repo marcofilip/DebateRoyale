@@ -1,7 +1,5 @@
 # Debate Royale
 
-**Stato del Progetto:** In Sviluppo 🚧
-
 ## Descrizione Breve
 
 Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula un gioco di dibattito competitivo 1 contro 1 in tempo reale. Gli utenti possono entrare in stanze virtuali, sfidarsi su argomenti casuali, e venire giudicati sia dagli altri utenti spettatori che da un'intelligenza artificiale (Google Gemini).
@@ -9,14 +7,14 @@ Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula u
 ## Funzionalità Principali (Previste)
 
 -   **Autenticazione Utenti:** Registrazione e Login sicuri tramite ASP.NET Core Identity.
--   **Stanze Multiple:** Diverse stanze tematiche dove gli utenti possono radunarsi (limite 50 utenti/stanza).
+-   **Stanze Multiple:** Diverse stanze tematiche dove gli utenti possono radunarsi (6 stanze, limite 20 utenti/stanza).
 -   **Ingresso/Uscita Stanze:** Possibilità per gli utenti loggati di entrare e uscire dalle stanze.
 -   **Voto Inizio Partita:** Gli utenti in una stanza possono votare per iniziare un round di dibattito.
 -   **Matchmaking Casuale:** Selezione casuale di due giocatori (1v1) dalla stanza all'inizio di ogni round.
--   **Dibattito a Tempo:** Chat dedicata per i due sfidanti per argomentare su un topic casuale (durata 1 minuto).
+-   **Dibattito a Tempo:** Chat dedicata per i due sfidanti per argomentare su un topic casuale (durata 3 minuti).
 -   **Voto Spettatori Real-Time:** Gli altri utenti nella stanza possono votare per il giocatore che ritengono stia argomentando meglio.
 -   **Giudizio AI:** Al termine del round, la trascrizione della chat viene inviata all'API di Google Gemini per un'analisi e la dichiarazione di un vincitore.
--   **Punteggio Ibrido:** Il risultato finale del round è determinato da una combinazione ponderata (50/50) del voto degli spettatori e del verdetto dell'AI.
+-   **Punteggio Ibrido:** Il risultato finale del round è determinato da una combinazione ponderata del voto degli spettatori e del verdetto dell'AI.
 -   **Sistema di Punti:** Il vincitore del round ottiene un punto.
 -   **Interfaccia Moderna:** Frontend basato su Bootstrap 5 personalizzato con design moderno e fluido.
 
@@ -29,7 +27,7 @@ Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula u
 -   **ORM:** Entity Framework Core 6.0.x
 -   **Autenticazione:** ASP.NET Core Identity
 -   **Intelligenza Artificiale:** Google Gemini API (via chiamate HTTP dirette)
--   **Real-time (Pianificato):** SignalR
+-   **Real-time:** SignalR
 
 ## Prerequisiti
 
@@ -42,7 +40,7 @@ Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula u
 1.  **Clona il Repository:**
 
     ```bash
-    git clone <URL_DEL_TUO_REPOSITORY>
+    git clone https://github.com/marcofilip/DebateRoyale
     cd DebateRoyale
     ```
 
