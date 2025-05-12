@@ -82,9 +82,6 @@ namespace DebateRoyale.Areas.Identity.Pages.Account.Manage
         /// </summary>
         public List<SelectListItem> AvailableAvatars { get; } = new List<SelectListItem>
         {
-            new SelectListItem { Value = "avatar1.png", Text = "Babbo Natale" },
-            new SelectListItem { Value = "avatar2.png", Text = "Donna" },
-            new SelectListItem { Value = "avatar3.png", Text = "Uomo" },
             new SelectListItem { Value = "default_avatar.png", Text = "Default" }
         };
 
