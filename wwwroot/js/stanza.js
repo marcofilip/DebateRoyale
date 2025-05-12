@@ -12,7 +12,6 @@ let debater2UserIdGlobal = null;
 let countdownInterval = null;
 let hasVoted = false;
 
-// DOM Elements
 const debateStatusDiv = document.getElementById("debateStatus");
 const debateAreaDiv = document.getElementById("debateArea");
 const debateTopicSpan = document.getElementById("debateTopic");
@@ -57,13 +56,11 @@ function clearDebateUI(updateStatusDiv = true) {
     debater2VotesSpan.textContent = "0";
     if (countdownInterval) clearInterval(countdownInterval);
 
-    // Gestisci il div di stato solo se richiesto
     if (updateStatusDiv) {
         debateStatusDiv.textContent = "Waiting for opponent...";
         debateStatusDiv.style.display = "block";
     }
 
-    // Show general chat
     chatMessagesNonDebateDiv.style.display = "block";
     document.getElementById("chatInputAreaNonDebate").style.display = "flex";
 }
@@ -76,7 +73,6 @@ function addMessageToChat(user, message, isSystem = false) {
         entry.classList.add("system-message");
         entry.innerHTML = `<em>${message}</em>`;
     } else {
-        // Controlla se il messaggio è dell'utente corrente
         const isCurrentUser = user === getUsernameFromId(currentUserId);
 
         if (isCurrentUser) {
@@ -90,7 +86,6 @@ function addMessageToChat(user, message, isSystem = false) {
 
     chatBox.appendChild(entry);
 
-    // Animazione di scrolling fluido
     chatBox.scrollTo({
         top: chatBox.scrollHeight,
         behavior: "smooth",
@@ -101,7 +96,6 @@ function addMessageToNonDebateChat(user, message) {
     const entry = document.createElement("div");
     entry.classList.add("chat-message");
 
-    // Controlla se il messaggio è dell'utente corrente
     const isCurrentUser = user === getUsernameFromId(currentUserId);
 
     if (isCurrentUser) {
@@ -114,16 +108,13 @@ function addMessageToNonDebateChat(user, message) {
 
     chatMessagesNonDebateDiv.appendChild(entry);
 
-    // Animazione di scrolling fluido
     chatMessagesNonDebateDiv.scrollTo({
         top: chatMessagesNonDebateDiv.scrollHeight,
         behavior: "smooth",
     });
 }
 
-// Funzione helper per ottenere il nome utente dall'id
 function getUsernameFromId(userId) {
-    // Cerchiamo nei partecipanti
     const participantElement = document.querySelector(
         `#participantsList li[data-user-id="${userId}"]`
     );
@@ -131,7 +122,6 @@ function getUsernameFromId(userId) {
         return participantElement.textContent.trim();
     }
 
-    // Se non trovato tra i partecipanti, controllare i debaters
     if (userId === debater1UserIdGlobal) {
         return debater1Global;
     } else if (userId === debater2UserIdGlobal) {
@@ -150,14 +140,13 @@ connection.on("JoinedRoomSuccess", (message) => {
 connection.on("ParticipantJoined", (username, participantNumber) => {
     console.log(`${username} joined as participant ${participantNumber}.`);
     debateStatusDiv.textContent = `${username} has joined. Waiting for debate to start...`;
-    // Could update a list of participants here
     const li = document.createElement("li");
     li.textContent =
         username +
         (participantNumber === 1
             ? " (Waiting for opponent)"
             : " (Ready to debate)");
-    li.id = `user-${username.replace(/\s+/g, "-")}`; // Create an ID for potential removal
+    li.id = `user-${username.replace(/\s+/g, "-")}`;
     participantsListUl.appendChild(li);
 });
 
@@ -182,30 +171,27 @@ connection.on(
     "DebateAlreadyInProgress",
     (
         topic,
-        debater1Name, // Nome del dibattente 1 dal server
-        debater2Name, // Nome del dibattente 2 dal server
+        debater1Name,
+        debater2Name,
         transcript,
         timeRemainingSeconds,
-        serverDebater1Id, // ID del dibattente 1 dal server
-        serverDebater2Id, // ID del dibattente 2 dal server
-        spectatorHasAlreadyVotedParam, // boolean se lo spettatore ha già votato
-        currentVotes1, // Conteggio voti attuale per dibattente 1
-        currentVotes2 // Conteggio voti attuale per dibattente 2
+        serverDebater1Id,
+        serverDebater2Id, 
+        spectatorHasAlreadyVotedParam, 
+        currentVotes1,
+        currentVotes2 
     ) => {
         console.log(
             `DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`
         );
 
-        // Prima nascondiamo il div di stato per evitare il flash del messaggio
         debateStatusDiv.style.display = "none";
 
-        // Poi pulisce il resto della UI
-        clearDebateUI(false); // Passa false per non modificare il div di stato
+        clearDebateUI(false); 
 
-        debateAreaDiv.style.display = "block"; // Mostra l'area principale del dibattito
+        debateAreaDiv.style.display = "block";
         resultsAreaDiv.style.display = "none";
 
-        // Nascondi la chat non-dibattito perché siamo in un dibattito attivo
         if (chatMessagesNonDebateDiv)
             chatMessagesNonDebateDiv.style.display = "none";
         const chatInputNonDebate = document.getElementById(
@@ -213,12 +199,10 @@ connection.on(
         );
         if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
-        // Imposta informazioni del dibattito
         debateTopicSpan.textContent = topic;
         debater1NameSpan.textContent = debater1Name;
         debater2NameSpan.textContent = debater2Name;
 
-        // Imposta le variabili globali cruciali per i nomi e gli ID dei dibattenti
         debater1Global = debater1Name;
         debater2Global = debater2Name;
         debater1UserIdGlobal = serverDebater1Id;
@@ -227,7 +211,6 @@ connection.on(
             `DebateAlreadyInProgress: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`
         );
 
-        // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
             .querySelectorAll(".debater1-vote-name")
             .forEach((el) => (el.textContent = debater1Global));
@@ -235,41 +218,35 @@ connection.on(
             .querySelectorAll(".debater2-vote-name")
             .forEach((el) => (el.textContent = debater2Global));
 
-        // Popola la trascrizione
-        chatBox.innerHTML = ""; // Pulisci messaggi precedenti
+        chatBox.innerHTML = ""; 
         transcript.forEach((msg) => {
-            const parts = msg.split(": "); // Semplice split, potrebbe essere migliorato
+            const parts = msg.split(": "); 
             if (parts.length >= 2) {
                 addMessageToChat(parts[0], parts.slice(1).join(": "));
             } else {
-                addMessageToChat(null, msg, true); // Messaggio di sistema o formato strano
+                addMessageToChat(null, msg, true);
             }
         });
 
-        // Gli spettatori non possono inviare messaggi al dibattito
         if (messageInputArea) messageInputArea.style.display = "none";
 
-        // Gestisci l'area di voto per lo spettatore
         if (voteAreaDiv) {
-            // Solo gli spettatori vedono l'area di voto
             if (
                 currentUserId !== serverDebater1Id &&
                 currentUserId !== serverDebater2Id
             ) {
                 voteAreaDiv.style.display = "block";
-                hasVoted = spectatorHasAlreadyVotedParam; // Imposta se lo spettatore ha già votato
+                hasVoted = spectatorHasAlreadyVotedParam; 
                 if (voteDebater1Button) voteDebater1Button.disabled = hasVoted;
                 if (voteDebater2Button) voteDebater2Button.disabled = hasVoted;
             } else {
-                voteAreaDiv.style.display = "none"; // Nascondi se l'utente è uno dei dibattenti (caso limite)
+                voteAreaDiv.style.display = "none"; 
             }
         }
 
-        // Aggiorna i conteggi dei voti visualizzati
         if (debater1VotesSpan) debater1VotesSpan.textContent = currentVotes1;
         if (debater2VotesSpan) debater2VotesSpan.textContent = currentVotes2;
 
-        // Imposta il timer
         if (countdownInterval) clearInterval(countdownInterval);
         let timeLeft = timeRemainingSeconds;
         timerSpan.textContent = formatTime(timeLeft);
@@ -279,7 +256,6 @@ connection.on(
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 timerSpan.textContent = "Time's up!";
-                // Il server invierà "DebateEnded"
             }
         }, 1000);
     }
@@ -289,13 +265,13 @@ connection.on(
     "DebateStarted",
     (
         topic,
-        debater1Name, // Nome del dibattente 1 dal server
-        debater2Name, // Nome del dibattente 2 dal server
-        serverDebater1Id, // ID del dibattente 1 dal server
-        serverDebater2Id, // ID del dibattente 2 dal server
+        debater1Name, 
+        debater2Name, 
+        serverDebater1Id,
+        serverDebater2Id, 
         durationSeconds,
-        serverDebater1Avatar, // nuovo parametro: avatar di debater 1
-        serverDebater2Avatar // nuovo parametro: avatar di debater 2
+        serverDebater1Avatar, 
+        serverDebater2Avatar 
     ) => {
         console.log(
             `DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`
@@ -313,7 +289,6 @@ connection.on(
         );
 
         if (statusDivFromDom) {
-            // Usa la versione appena recuperata per il test
             console.log("DEBATESTARTED: Attempting to hide statusDivFromDom");
             statusDivFromDom.style.display = "none";
             console.log(
@@ -326,8 +301,7 @@ connection.on(
             );
         }
 
-        // Poi pulisce il resto della UI
-        clearDebateUI(false); // Passa false per non modificare il div di stato
+        clearDebateUI(false);
 
         if (debateAreaDiv) debateAreaDiv.style.display = "block";
         if (resultsAreaDiv) resultsAreaDiv.style.display = "none";
@@ -339,12 +313,10 @@ connection.on(
         );
         if (chatInputNonDebate) chatInputNonDebate.style.display = "none";
 
-        // Imposta informazioni del dibattito
         debateTopicSpan.textContent = topic;
         debater1NameSpan.textContent = debater1Name;
         debater2NameSpan.textContent = debater2Name;
 
-        // Imposta le variabili globali cruciali
         debater1Global = debater1Name;
         debater2Global = debater2Name;
         debater1UserIdGlobal = serverDebater1Id;
@@ -353,7 +325,6 @@ connection.on(
             `DebateStarted: Set globals - D1: ${debater1Global} (ID: ${debater1UserIdGlobal}), D2: ${debater2Global} (ID: ${debater2UserIdGlobal})`
         );
 
-        // Aggiorna il testo nei pulsanti di voto (se usi span annidati)
         document
             .querySelectorAll(".debater1-vote-name")
             .forEach((el) => (el.textContent = debater1Global));
@@ -361,32 +332,27 @@ connection.on(
             .querySelectorAll(".debater2-vote-name")
             .forEach((el) => (el.textContent = debater2Global));
 
-        chatBox.innerHTML = ""; // Pulisci la chatBox per il nuovo dibattito
+        chatBox.innerHTML = "";
 
-        // Gestisci la visibilità dell'input del dibattito e dell'area di voto
         if (
             currentUserId === serverDebater1Id ||
             currentUserId === serverDebater2Id
         ) {
-            // L'utente è un dibattente
             if (messageInputArea) messageInputArea.style.display = "flex";
             if (voteAreaDiv) voteAreaDiv.style.display = "none";
         } else {
-            // L'utente è uno spettatore
             if (messageInputArea) messageInputArea.style.display = "none";
             if (voteAreaDiv) {
-                hasVoted = false; // Gli spettatori iniziano un nuovo dibattito senza aver votato
+                hasVoted = false;
                 if (voteDebater1Button) voteDebater1Button.disabled = false;
                 if (voteDebater2Button) voteDebater2Button.disabled = false;
                 voteAreaDiv.style.display = "block";
             }
         }
 
-        // Resetta i conteggi dei voti visualizzati a 0 per un nuovo dibattito
         if (debater1VotesSpan) debater1VotesSpan.textContent = "0";
         if (debater2VotesSpan) debater2VotesSpan.textContent = "0";
 
-        // Imposta avatar dei debater
         const debater1AvatarImg = document.getElementById("debater1Avatar");
         if (debater1AvatarImg && serverDebater1Avatar) {
             debater1AvatarImg.src = `/images/avatars/${serverDebater1Avatar}`;
@@ -396,7 +362,6 @@ connection.on(
             debater2AvatarImg.src = `/images/avatars/${serverDebater2Avatar}`;
         }
 
-        // Imposta il timer
         if (countdownInterval) clearInterval(countdownInterval);
         let timeLeft = durationSeconds;
         timerSpan.textContent = formatTime(timeLeft);
@@ -406,7 +371,6 @@ connection.on(
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 timerSpan.textContent = "Time's up!";
-                // Il server invierà "DebateEnded"
             }
         }, 1000);
 
@@ -424,10 +388,10 @@ connection.on(
 
 if (voteDebater1Button) {
     voteDebater1Button.addEventListener("click", (event) => {
-        console.log("Vote for Debater 1 button CLICKED"); // LOG 1
+        console.log("Vote for Debater 1 button CLICKED"); 
         event.preventDefault();
         if (hasVoted) {
-            console.log("Vote attempt: Already voted."); // LOG 2
+            console.log("Vote attempt: Already voted."); 
             addMessageToChat(
                 null,
                 "You have already voted in this debate.",
@@ -439,7 +403,7 @@ if (voteDebater1Button) {
             console.log(
                 "Vote attempt: debater1UserIdGlobal is set:",
                 debater1UserIdGlobal
-            ); // LOG 3
+            );
             const confirmationMessage =
                 "Are you sure you want to vote for " +
                 (debater1Global || "Debater 1") +
@@ -481,7 +445,7 @@ if (voteDebater1Button) {
                 "Cannot vote for Debater 1: debater1UserIdGlobal or debater1Global is not set.",
                 debater1UserIdGlobal,
                 debater1Global
-            ); // LOG 8
+            ); 
             addMessageToChat(
                 null,
                 "Cannot vote: Debater information is missing.",
@@ -493,11 +457,11 @@ if (voteDebater1Button) {
 
 if (voteDebater2Button) {
     voteDebater2Button.addEventListener("click", (event) => {
-        console.log("Vote for Debater 2 button CLICKED"); // LOG 1
+        console.log("Vote for Debater 2 button CLICKED"); 
         event.preventDefault();
 
         if (hasVoted) {
-            console.log("Vote attempt: Already voted."); // LOG 2
+            console.log("Vote attempt: Already voted.");
             addMessageToChat(
                 null,
                 "You have already voted in this debate.",
@@ -510,7 +474,7 @@ if (voteDebater2Button) {
             console.log(
                 "Vote attempt: debater2UserIdGlobal is set:",
                 debater2UserIdGlobal
-            ); // LOG 3
+            ); 
             const confirmationMessage =
                 "Are you sure you want to vote for " +
                 debater2Global +
@@ -518,8 +482,7 @@ if (voteDebater2Button) {
                 "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
 
             if (confirm(confirmationMessage)) {
-                // INVOKE SOLO SE CONFERMATO
-                console.log("Vote confirmed by user for Debater 2."); // LOG 4
+                console.log("Vote confirmed by user for Debater 2."); 
                 voteDebater1Button.disabled = true;
                 voteDebater2Button.disabled = true;
 
@@ -528,7 +491,7 @@ if (voteDebater2Button) {
                     .then(() => {
                         console.log(
                             "CastVote for Debater 2 successful (then block)."
-                        ); // LOG 5
+                        ); 
                         hasVoted = true;
                         addMessageToChat(
                             null,
@@ -540,7 +503,7 @@ if (voteDebater2Button) {
                         console.error(
                             `Error invoking 'CastVote' for ${debater2Global}:`,
                             err.toString()
-                        ); // LOG 6
+                        ); 
                         let userErrorMessage =
                             "An error occurred while trying to cast your vote. Please try again.";
                         addMessageToChat(null, userErrorMessage, true);
@@ -550,15 +513,14 @@ if (voteDebater2Button) {
                         }
                     });
             } else {
-                console.log("Vote for Debater 2 cancelled by user."); // LOG 7
-                // NON fare nulla se l'utente annulla, i pulsanti rimangono abilitati
+                console.log("Vote for Debater 2 cancelled by user.");
             }
         } else {
             console.error(
                 "Cannot vote for Debater 2: debater2UserIdGlobal or debater2Global is not set.",
                 debater2UserIdGlobal,
                 debater2Global
-            ); // LOG 8
+            ); 
             addMessageToChat(
                 null,
                 "Cannot vote: Debater information is missing.",
@@ -594,15 +556,14 @@ connection.on("DebateEnded", (winnerName, aiAnalysis, d1Votes, d2Votes) => {
     console.log("Debate ended. Winner: " + winnerName);
     if (countdownInterval) clearInterval(countdownInterval);
 
-    debateAreaDiv.style.display = "none"; // Hide active debate area
-    resultsAreaDiv.style.display = "block"; // Show results
+    debateAreaDiv.style.display = "none";
+    resultsAreaDiv.style.display = "block";
 
     winnerNameSpan.textContent = winnerName;
     finalDebater1VotesSpan.textContent = d1Votes;
     finalDebater2VotesSpan.textContent = d2Votes;
     aiAnalysisResultDiv.textContent = aiAnalysis;
 
-    // Reset debater globals for next round safety
     debater1Global = null;
     debater2Global = null;
     debater1UserIdGlobal = null;
@@ -612,7 +573,6 @@ connection.on("DebateEnded", (winnerName, aiAnalysis, d1Votes, d2Votes) => {
     if (voteDebater2Button) voteDebater2Button.disabled = true;
 });
 
-// Event Listeners
 if (sendButton) {
     sendButton.addEventListener("click", (event) => {
         const message = messageInput.value;
@@ -628,7 +588,7 @@ if (sendButton) {
 if (messageInput) {
     messageInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
-            event.preventDefault(); // Prevent form submission if it's in a form
+            event.preventDefault(); 
             sendButton.click();
         }
     });
@@ -638,7 +598,6 @@ if (sendChatMessageButton) {
     sendChatMessageButton.addEventListener("click", (event) => {
         const message = chatMessageInput.value;
         if (message.trim() !== "") {
-            // For non-debate chat, we still use "SendMessage" but the hub logic will differentiate
             connection
                 .invoke("SendMessage", roomId, message)
                 .catch((err) => console.error(err.toString()));
@@ -663,7 +622,7 @@ if (readyForNewDebateButton) {
         clearDebateUI();
         if (connection.state === signalR.HubConnectionState.Connected) {
             try {
-                await connection.invoke("JoinRoom", roomId); // This will re-trigger the server's join logic
+                await connection.invoke("JoinRoom", roomId); 
                 debateStatusDiv.textContent =
                     "Signaled readiness for a new debate. Waiting for opponent...";
             } catch (err) {
@@ -682,7 +641,7 @@ if (readyForNewDebateButton) {
 
 async function start() {
     try {
-        clearDebateUI(); // Assumendo che questa funzione esista e sia definita altrove
+        clearDebateUI(); 
 
         if (typeof roomId === "undefined" || roomId === null || roomId === 0) {
             console.error(
@@ -709,11 +668,6 @@ async function start() {
             console.log(
                 "SignalR already connected. Attempting to join room if not already in logic."
             );
-            // Potresti voler richiamare JoinRoom qui se la logica lo richiede
-            // o assumere che se è connesso, JoinRoom è già stato gestito o lo sarà.
-            // Per sicurezza, se start() viene chiamata e si è già connessi,
-            // assicurarsi che l'utente sia nel gruppo corretto potrebbe essere utile.
-            // await connection.invoke("JoinRoom", roomId); // Valuta se necessario
         }
     } catch (err) {
         console.error("SignalR Connection Error during start(): ", err);
@@ -722,12 +676,9 @@ async function start() {
                 "Failed to connect. Please refresh.";
             connectionStatusP.className = "text-danger";
         }
-        // Considera di non fare un retry automatico qui dentro se start() è già chiamata da onclose
-        // setTimeout(start, 5000);
     }
 }
 
-// SOLO UN connection.onclose !!
 connection.onclose(async () => {
     console.log("SignalR Connection Closed. Attempting to reconnect...");
     if (connectionStatusP) {
@@ -735,9 +686,7 @@ connection.onclose(async () => {
             "Connection lost. Attempting to reconnect...";
         connectionStatusP.className = "text-danger";
     }
-    // Attendi un po' prima di tentare la riconnessione
     await new Promise((resolve) => setTimeout(resolve, 5000));
-    // Assicurati che start() venga chiamata solo se roomId è ancora valido.
     if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
         await start();
     } else {
@@ -751,11 +700,9 @@ connection.onclose(async () => {
     }
 });
 
-// Chiamata iniziale a start()
 if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
-    start(); // Chiama start se roomId è valido
+    start(); 
 } else {
-    // Logica di errore se roomId non è valido al momento del caricamento iniziale dello script
     console.error(
         "Initial script load: Room ID is not defined or invalid. Cannot initiate start(). Value:",
         roomId

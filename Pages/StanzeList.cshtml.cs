@@ -1,4 +1,3 @@
-// Pages/StanzeList.cshtml.cs
 using DebateRoyale.Data;
 using DebateRoyale.Models;
 using DebateRoyale.Services;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace DebateRoyale.Pages;
 
-[Authorize] // Only authenticated users can see the list of rooms
+[Authorize]
 public class StanzeListModel : PageModel
 {
     private readonly ApplicationDbContext _context;

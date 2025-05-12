@@ -1,4 +1,3 @@
-// Pages/Stanza.cshtml.cs
 using DebateRoyale.Data;
 using DebateRoyale.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +27,6 @@ public class StanzaModel : PageModel
 
         if (CurrentRoom == null)
         {
-            // Room not found, maybe set a TempData message and redirect
             TempData["ErrorMessage"] = "The debate room you tried to enter does not exist.";
             return RedirectToPage("/StanzeList");
         }

@@ -1,9 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// DebateRoyale UI enhancements
-document.addEventListener("DOMContentLoaded", function () {
-    // Add animation class to cards when page loads
+﻿document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
         document.querySelectorAll(".card").forEach((card, index) => {
             setTimeout(() => {
@@ -12,7 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }, 200);
 
-    // Add hover effect to navigation links
     document.querySelectorAll(".nav-link").forEach((link) => {
         link.addEventListener("mouseenter", function () {
             this.classList.add("pulse");
@@ -23,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", function (e) {
             e.preventDefault();
@@ -37,7 +30,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Add toast notifications support
     window.showToast = function (message, type = "info", duration = 3000) {
         const toast = document.createElement("div");
         toast.className = `toast toast-${type} show`;
@@ -68,7 +60,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Add CSS for toast notifications
     const style = document.createElement("style");
     style.textContent = `
         .toast {

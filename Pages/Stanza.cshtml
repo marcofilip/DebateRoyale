@@ -70,7 +70,6 @@ else
                                 </div>
 
                                 <div id="chatBox" style="height: 350px; overflow-y: scroll;">
-                                    <!-- I messaggi appariranno qui -->
                                 </div>
                                 <div class="input-group mt-3" id="messageInputArea">
                                     <span class="input-group-text bg-transparent border-end-0">
@@ -115,7 +114,6 @@ else
                         </div>
                         <div class="card-body">
                             <div id="chatMessagesNonDebate" style="height: 200px; overflow-y: scroll;">
-                                <!-- Messaggi della chat generale quando non c'è un dibattito attivo -->
                             </div>
                             <div class="input-group mt-3" id="chatInputAreaNonDebate">
                                 <span class="input-group-text bg-transparent border-end-0">
@@ -181,7 +179,6 @@ else
                 </div>
                 <div class="card-body p-0">
                     <ul id="participantsList" class="list-group list-group-flush">
-                        <!-- I partecipanti saranno elencati qui da SignalR -->
                     </ul>
                 </div>
             </div>
@@ -206,8 +203,6 @@ else
         </div>
     </div>
 }
-
-<!-- Debug info removed for production-ready design -->
 
 @section Scripts {
     <script src="~/lib/signalr/signalr.min.js"></script>

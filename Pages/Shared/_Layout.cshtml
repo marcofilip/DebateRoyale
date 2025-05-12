@@ -14,7 +14,6 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <!-- Preloader -->
     <div class="preloader">
         <div class="spinner">
             <div class="double-bounce1"></div>
@@ -84,7 +83,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        // Preloader script
         window.addEventListener('load', function() {
             setTimeout(function() {
                 document.querySelector('.preloader').classList.add('hide');

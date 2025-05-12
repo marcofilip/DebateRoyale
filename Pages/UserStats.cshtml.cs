@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization; // Se vuoi che sia solo per utenti loggati
+using Microsoft.AspNetCore.Authorization;
 
 namespace DebateRoyale.Pages
 {
-    // [Authorize] // Decommenta se vuoi che solo gli utenti loggati vedano le stats
+    [Authorize]
     public class UserStatsModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -33,8 +33,8 @@ namespace DebateRoyale.Pages
         public async Task OnGetAsync()
         {
             var users = await _userManager.Users
-                                    .OrderByDescending(u => u.Wins) // Ordina per vittorie
-                                    .ThenBy(u => u.Losses)        // Poi per minor numero di sconfitte
+                                    .OrderByDescending(u => u.Wins) 
+                                    .ThenBy(u => u.Losses)       
                                     .ToListAsync();
 
             UserStats = users.Select(u => new UserStatViewModel

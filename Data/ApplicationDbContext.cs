@@ -18,7 +18,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
-        // Seed Rooms
         builder.Entity<Room>().HasData(
             new Room { Id = 1, Name = "Cultura Pop", GeneralTopic = "Cinema, musica, tendenze e fenomeni culturali", MaxUsers = 20 },
             new Room { Id = 2, Name = "Innovazione Tecnologica", GeneralTopic = "Nuove tecnologie, futuro digitale e impatti sociali", MaxUsers = 20 },

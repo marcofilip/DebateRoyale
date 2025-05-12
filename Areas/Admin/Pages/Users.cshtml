@@ -2,7 +2,7 @@
 @model DebateRoyale.Areas.Admin.Pages.UsersModel
 @{
     ViewData["Title"] = "Gestione Utenti";
-    Layout = "/Pages/Shared/_Layout.cshtml"; // O un layout specifico per l'admin
+    Layout = "/Pages/Shared/_Layout.cshtml"; 
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -51,11 +51,9 @@
                 <td>@user.Wins</td>
                 <td>@user.Losses</td>
                 <td>
-                    @* <a asp-page="./EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Modifica</a> *@
                     <form method="post" asp-page-handler="DeleteUser" asp-route-id="@user.Id" onsubmit="return confirm('Sei sicuro di voler eliminare l\'utente @user.UserName?');">
                         <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
                     </form>
-                    @* Aggiungi altri pulsanti per altre azioni *@
                 </td>
             </tr>
         }

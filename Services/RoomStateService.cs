@@ -155,13 +155,11 @@ public class RoomStateService
         _userConnectionsToRoom[connectionId] = roomId;
         var debate = _activeDebates.GetOrAdd(roomId, _ => new ActiveDebateState { RoomId = roomId });
 
-        if (debate.IsActive) // L'utente si unisce a un dibattito attivo come spettatore
+        if (debate.IsActive) 
         {
-            // Calcola il tempo rimanente usando la configurazione corretta
             double remainingSecondsDouble = 0;
-            if (debate.StartTime != DateTime.MinValue) // Assicurati che StartTime sia stato impostato
+            if (debate.StartTime != DateTime.MinValue) 
             {
-                // USA LA COSTANTE CORRETTA QUI
                 TimeSpan totalDebateDuration = TimeSpan.FromSeconds(DebateDurationSecondsConfig);
                 TimeSpan elapsed = DateTime.UtcNow - debate.StartTime;
                 remainingSecondsDouble = (totalDebateDuration - elapsed).TotalSeconds;
@@ -179,7 +177,7 @@ public class RoomStateService
                 debate.SpecificTopic,
                 debate.Debater1Username,
                 debate.Debater2Username,
-                debate.Transcript.ToList(), // Buona pratica inviare una copia
+                debate.Transcript.ToList(),
                 timeRemainingForSpectator,
                 debate.Debater1UserId,
                 debate.Debater2UserId,
@@ -205,7 +203,6 @@ public class RoomStateService
         }
         else
         {
-            // User is a spectator, or trying to join a full waiting room
             await _hubContext.Clients.Client(connectionId).SendAsync("SpectatorJoined", debate.Debater1Username, debate.Debater2Username);
         }
     }
@@ -223,25 +220,23 @@ public class RoomStateService
                 if (debate.Debater1ConnectionId == connectionId)
                 {
                     leftUsername = debate.Debater1Username;
-                    debate.Debater1ConnectionId = null; // Allow new debater1
-                    // If debate was active, the other debater wins by forfeit
+                    debate.Debater1ConnectionId = null; 
                     if (debate.IsActive && !debate.IsEnding) await EndDebate(roomId, debate.Debater2UserId, $"{leftUsername} left the debate.");
                     wasDebater = true;
                 }
                 else if (debate.Debater2ConnectionId == connectionId)
                 {
                     leftUsername = debate.Debater2Username;
-                    debate.Debater2ConnectionId = null; // Allow new debater2
+                    debate.Debater2ConnectionId = null; 
                     if (debate.IsActive && !debate.IsEnding) await EndDebate(roomId, debate.Debater1UserId, $"{leftUsername} left the debate.");
                     wasDebater = true;
                 }
 
-                if (wasDebater && !debate.IsActive && !string.IsNullOrEmpty(leftUsername)) // if debate was not active yet
+                if (wasDebater && !debate.IsActive && !string.IsNullOrEmpty(leftUsername)) 
                 {
                     await _hubContext.Clients.Group(roomId.ToString()).SendAsync("ParticipantLeft", leftUsername);
                 }
 
-                // If no debaters left and debate not active, clean up.
                 if (string.IsNullOrEmpty(debate.Debater1ConnectionId) && string.IsNullOrEmpty(debate.Debater2ConnectionId) && !debate.IsActive)
                 {
                     _activeDebates.TryRemove(roomId, out _);
@@ -322,7 +317,6 @@ public class RoomStateService
         {
             try
             {
-                // Prompt for Gemini
                 string prompt = $"Analizza la seguente trascrizione del dibattito. L'argomento era: \"{debate.SpecificTopic}\". " +
                                 $"Il Dibattente1 è {debate.Debater1Username}. Il Dibattente2 è {debate.Debater2Username}. " +
                                 $"Determina quale dibattente ha presentato argomentazioni più forti ed è stato più persuasivo. " +
@@ -331,13 +325,11 @@ public class RoomStateService
 
                 aiAnalysis = await _geminiService.GenerateContentAsync(prompt);
 
-                // Simple parsing for winner based on AI text
                 if (aiAnalysis.Contains($"Winner: {debate.Debater1Username}")) winnerByAi = debate.Debater1UserId;
                 else if (aiAnalysis.Contains($"Winner: {debate.Debater2Username}")) winnerByAi = debate.Debater2UserId;
             }
             catch (Exception ex)
             {
-                // Log the exception (not shown here for brevity)
                 aiAnalysis = $"AI analysis failed: {ex.Message}";
             }
         }
@@ -351,15 +343,13 @@ public class RoomStateService
         int debater2SpectatorVotes = debate.Votes.Count(v => v.Value == debate.Debater2UserId);
 
         string? finalWinnerId = null;
-        if (explicitWinnerId != null) // e.g. someone left
+        if (explicitWinnerId != null)
         {
             finalWinnerId = explicitWinnerId;
             aiAnalysis = reason ?? "Debate ended prematurely.";
         }
         else
         {
-            // Determine winner: 50% spectator, 50% AI
-            // 1 point for winning spectator vote, 1 point for winning AI vote
             int debater1Score = 0;
             int debater2Score = 0;
 
@@ -371,7 +361,7 @@ public class RoomStateService
 
             if (debater1Score > debater2Score) finalWinnerId = debate.Debater1UserId;
             else if (debater2Score > debater1Score) finalWinnerId = debate.Debater2UserId;
-            else finalWinnerId = null; // Tie
+            else finalWinnerId = null; 
         }
 
         string winnerUsername = "Tie";
@@ -384,7 +374,6 @@ public class RoomStateService
             debater1SpectatorVotes,
             debater2SpectatorVotes);
 
-        // Persist debate to DB
         using (var scope = _scopeFactory.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<Data.ApplicationDbContext>();
@@ -418,26 +407,20 @@ public class RoomStateService
                 }
             }
             else
-            { // Tie, or only one participant.
+            { 
                 if (debate.Debater1UserId != null)
                 {
                     var d1User = await dbContext.Users.FindAsync(debate.Debater1UserId);
-                    // if (d1User != null) d1User.Losses++; // Or some other stat for a tie.
                 }
                 if (debate.Debater2UserId != null)
                 {
                     var d2User = await dbContext.Users.FindAsync(debate.Debater2UserId);
-                    // if (d2User != null) d2User.Losses++;
                 }
             }
             await dbContext.SaveChangesAsync();
         }
 
-        // Reset state for the room to allow a new debate
         _activeDebates.TryRemove(roomId, out _);
-        // Users are still in the SignalR group, they can start a new debate by re-signaling readiness
-        // or the UI can prompt them. For simplicity, we fully reset.
-        // New participants joining will trigger UserJoinedRoom and potentially a new debate.
     }
 
     public Dictionary<int, int> GetActiveUserCountsPerRoom()

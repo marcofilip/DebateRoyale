@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DebateRoyale.Areas.Admin.Pages
 {
-    [Authorize(Roles = "Admin")] // Solo gli utenti con ruolo "Admin" possono accedere
+    [Authorize(Roles = "Admin")]
     public class UsersModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -27,7 +27,6 @@ namespace DebateRoyale.Areas.Admin.Pages
             Users = await _userManager.Users.ToListAsync();
         }
 
-        // Azione per eliminare un utente (esempio)
         public async Task<IActionResult> OnPostDeleteUserAsync(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -41,11 +40,10 @@ namespace DebateRoyale.Areas.Admin.Pages
                 return NotFound();
             }
 
-            // Non permettere all'admin di auto-eliminarsi o implementare logica aggiuntiva
             if (user.UserName == User.Identity.Name)
             {
                 ModelState.AddModelError(string.Empty, "Cannot delete the currently logged-in administrator.");
-                Users = await _userManager.Users.ToListAsync(); // Ricarica gli utenti per la vista
+                Users = await _userManager.Users.ToListAsync();
                 return Page();
             }
 
@@ -61,12 +59,10 @@ namespace DebateRoyale.Areas.Admin.Pages
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                Users = await _userManager.Users.ToListAsync(); // Ricarica in caso di errore
+                Users = await _userManager.Users.ToListAsync(); 
                 return Page();
             }
             return RedirectToPage();
         }
-
-        // Potresti aggiungere azioni per Modificare Ruoli, Bannare, ecc.
     }
 }
