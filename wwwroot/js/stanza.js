@@ -42,6 +42,62 @@ const chatMessagesNonDebateDiv = document.getElementById(
 const chatMessageInput = document.getElementById("chatMessageInput");
 const sendChatMessageButton = document.getElementById("sendChatMessageButton");
 
+let isOnCooldown = false;
+let cooldownTime = 0;
+let cooldownInterval = null;
+
+function startCooldown() {
+    isOnCooldown = true;
+    cooldownTime = 10;
+
+    console.log("Cooldown started, disabling buttons");
+
+    // Aggiorna la chat generale
+    if (sendChatMessageButton) {
+        sendChatMessageButton.disabled = true;
+        sendChatMessageButton.innerHTML = `<i class="fas fa-clock me-1"></i> ${cooldownTime}s`;
+    }
+    
+    // Aggiorna anche il pulsante della chat di dibattito
+    if (sendButton) {
+        sendButton.disabled = true;
+        sendButton.innerHTML = `<i class="fas fa-clock me-1"></i> ${cooldownTime}s`;
+    }
+
+    cooldownInterval = setInterval(() => {
+        cooldownTime--;
+
+        // Aggiorna la chat generale
+        if (sendChatMessageButton) {
+            sendChatMessageButton.innerHTML = `<i class="fas fa-clock me-1"></i> ${cooldownTime}s`;
+        }
+        
+        // Aggiorna anche il pulsante della chat di dibattito
+        if (sendButton) {
+            sendButton.innerHTML = `<i class="fas fa-clock me-1"></i> ${cooldownTime}s`;
+        }
+
+        if (cooldownTime <= 0) {
+            clearInterval(cooldownInterval);
+            isOnCooldown = false;
+
+            console.log("Cooldown finished, enabling buttons");
+
+            // Ripristina la chat generale
+            if (sendChatMessageButton) {
+                sendChatMessageButton.disabled = false;
+                sendChatMessageButton.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Invia`;
+            }
+            
+            // Ripristina anche il pulsante della chat di dibattito
+            if (sendButton) {
+                sendButton.disabled = false;
+                sendButton.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Invia`;
+            }
+        }
+    }, 1000);
+}
+
 function clearDebateUI(updateStatusDiv = true) {
     debateAreaDiv.style.display = "none";
     resultsAreaDiv.style.display = "none";
@@ -176,10 +232,10 @@ connection.on(
         transcript,
         timeRemainingSeconds,
         serverDebater1Id,
-        serverDebater2Id, 
-        spectatorHasAlreadyVotedParam, 
+        serverDebater2Id,
+        spectatorHasAlreadyVotedParam,
         currentVotes1,
-        currentVotes2 
+        currentVotes2
     ) => {
         console.log(
             `DebateAlreadyInProgress received. Topic: ${topic}, Spectator has voted: ${spectatorHasAlreadyVotedParam}, Time Remaining: ${timeRemainingSeconds}s, Votes: ${currentVotes1}-${currentVotes2}`
@@ -187,7 +243,7 @@ connection.on(
 
         debateStatusDiv.style.display = "none";
 
-        clearDebateUI(false); 
+        clearDebateUI(false);
 
         debateAreaDiv.style.display = "block";
         resultsAreaDiv.style.display = "none";
@@ -218,9 +274,9 @@ connection.on(
             .querySelectorAll(".debater2-vote-name")
             .forEach((el) => (el.textContent = debater2Global));
 
-        chatBox.innerHTML = ""; 
+        chatBox.innerHTML = "";
         transcript.forEach((msg) => {
-            const parts = msg.split(": "); 
+            const parts = msg.split(": ");
             if (parts.length >= 2) {
                 addMessageToChat(parts[0], parts.slice(1).join(": "));
             } else {
@@ -236,11 +292,11 @@ connection.on(
                 currentUserId !== serverDebater2Id
             ) {
                 voteAreaDiv.style.display = "block";
-                hasVoted = spectatorHasAlreadyVotedParam; 
+                hasVoted = spectatorHasAlreadyVotedParam;
                 if (voteDebater1Button) voteDebater1Button.disabled = hasVoted;
                 if (voteDebater2Button) voteDebater2Button.disabled = hasVoted;
             } else {
-                voteAreaDiv.style.display = "none"; 
+                voteAreaDiv.style.display = "none";
             }
         }
 
@@ -265,13 +321,13 @@ connection.on(
     "DebateStarted",
     (
         topic,
-        debater1Name, 
-        debater2Name, 
+        debater1Name,
+        debater2Name,
         serverDebater1Id,
-        serverDebater2Id, 
+        serverDebater2Id,
         durationSeconds,
-        serverDebater1Avatar, 
-        serverDebater2Avatar 
+        serverDebater1Avatar,
+        serverDebater2Avatar
     ) => {
         console.log(
             `DebateStarted received. Topic: ${topic} between ${debater1Name} and ${debater2Name}. Duration: ${durationSeconds}s`
@@ -388,10 +444,10 @@ connection.on(
 
 if (voteDebater1Button) {
     voteDebater1Button.addEventListener("click", (event) => {
-        console.log("Vote for Debater 1 button CLICKED"); 
+        console.log("Vote for Debater 1 button CLICKED");
         event.preventDefault();
         if (hasVoted) {
-            console.log("Vote attempt: Already voted."); 
+            console.log("Vote attempt: Already voted.");
             addMessageToChat(
                 null,
                 "You have already voted in this debate.",
@@ -445,7 +501,7 @@ if (voteDebater1Button) {
                 "Cannot vote for Debater 1: debater1UserIdGlobal or debater1Global is not set.",
                 debater1UserIdGlobal,
                 debater1Global
-            ); 
+            );
             addMessageToChat(
                 null,
                 "Cannot vote: Debater information is missing.",
@@ -457,7 +513,7 @@ if (voteDebater1Button) {
 
 if (voteDebater2Button) {
     voteDebater2Button.addEventListener("click", (event) => {
-        console.log("Vote for Debater 2 button CLICKED"); 
+        console.log("Vote for Debater 2 button CLICKED");
         event.preventDefault();
 
         if (hasVoted) {
@@ -474,7 +530,7 @@ if (voteDebater2Button) {
             console.log(
                 "Vote attempt: debater2UserIdGlobal is set:",
                 debater2UserIdGlobal
-            ); 
+            );
             const confirmationMessage =
                 "Are you sure you want to vote for " +
                 debater2Global +
@@ -482,7 +538,7 @@ if (voteDebater2Button) {
                 "This vote is final and cannot be changed. It's best to vote towards the end of the debate.";
 
             if (confirm(confirmationMessage)) {
-                console.log("Vote confirmed by user for Debater 2."); 
+                console.log("Vote confirmed by user for Debater 2.");
                 voteDebater1Button.disabled = true;
                 voteDebater2Button.disabled = true;
 
@@ -491,7 +547,7 @@ if (voteDebater2Button) {
                     .then(() => {
                         console.log(
                             "CastVote for Debater 2 successful (then block)."
-                        ); 
+                        );
                         hasVoted = true;
                         addMessageToChat(
                             null,
@@ -503,7 +559,7 @@ if (voteDebater2Button) {
                         console.error(
                             `Error invoking 'CastVote' for ${debater2Global}:`,
                             err.toString()
-                        ); 
+                        );
                         let userErrorMessage =
                             "An error occurred while trying to cast your vote. Please try again.";
                         addMessageToChat(null, userErrorMessage, true);
@@ -520,7 +576,7 @@ if (voteDebater2Button) {
                 "Cannot vote for Debater 2: debater2UserIdGlobal or debater2Global is not set.",
                 debater2UserIdGlobal,
                 debater2Global
-            ); 
+            );
             addMessageToChat(
                 null,
                 "Cannot vote: Debater information is missing.",
@@ -575,20 +631,27 @@ connection.on("DebateEnded", (winnerName, aiAnalysis, d1Votes, d2Votes) => {
 
 if (sendButton) {
     sendButton.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (isOnCooldown) {
+            return;
+        }
+
         const message = messageInput.value;
         if (message.trim() !== "") {
             connection
                 .invoke("SendMessage", roomId, message)
                 .catch((err) => console.error(err.toString()));
             messageInput.value = "";
+
+            startCooldown();
         }
-        event.preventDefault();
     });
 }
 if (messageInput) {
     messageInput.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault(); 
+        if (event.key === "Enter" && !isOnCooldown) {
+            event.preventDefault();
             sendButton.click();
         }
     });
@@ -596,14 +659,21 @@ if (messageInput) {
 
 if (sendChatMessageButton) {
     sendChatMessageButton.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (isOnCooldown) {
+            return;
+        }
+
         const message = chatMessageInput.value;
         if (message.trim() !== "") {
             connection
                 .invoke("SendMessage", roomId, message)
                 .catch((err) => console.error(err.toString()));
             chatMessageInput.value = "";
+
+            startCooldown();
         }
-        event.preventDefault();
     });
 }
 
@@ -622,7 +692,7 @@ if (readyForNewDebateButton) {
         clearDebateUI();
         if (connection.state === signalR.HubConnectionState.Connected) {
             try {
-                await connection.invoke("JoinRoom", roomId); 
+                await connection.invoke("JoinRoom", roomId);
                 debateStatusDiv.textContent =
                     "Signaled readiness for a new debate. Waiting for opponent...";
             } catch (err) {
@@ -641,7 +711,7 @@ if (readyForNewDebateButton) {
 
 async function start() {
     try {
-        clearDebateUI(); 
+        clearDebateUI();
 
         if (typeof roomId === "undefined" || roomId === null || roomId === 0) {
             console.error(
@@ -701,7 +771,7 @@ connection.onclose(async () => {
 });
 
 if (typeof roomId !== "undefined" && roomId !== null && roomId !== 0) {
-    start(); 
+    start();
 } else {
     console.error(
         "Initial script load: Room ID is not defined or invalid. Cannot initiate start(). Value:",

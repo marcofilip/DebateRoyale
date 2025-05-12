@@ -325,8 +325,9 @@ public class RoomStateService
 
                 aiAnalysis = await _geminiService.GenerateContentAsync(prompt);
 
-                if (aiAnalysis.Contains($"Winner: {debate.Debater1Username}")) winnerByAi = debate.Debater1UserId;
-                else if (aiAnalysis.Contains($"Winner: {debate.Debater2Username}")) winnerByAi = debate.Debater2UserId;
+                if (aiAnalysis.Contains($"Vincitore: {debate.Debater1Username}")) winnerByAi = debate.Debater1UserId;
+                else if (aiAnalysis.Contains($"Vincitore: {debate.Debater2Username}")) winnerByAi = debate.Debater2UserId;
+                else if (aiAnalysis.Contains("Vincitore: Pareggio")) winnerByAi = null;
             }
             catch (Exception ex)
             {
@@ -353,9 +354,11 @@ public class RoomStateService
             int debater1Score = 0;
             int debater2Score = 0;
 
-            if (debater1SpectatorVotes > debater2SpectatorVotes) debater1Score++;
-            else if (debater2SpectatorVotes > debater1SpectatorVotes) debater2Score++;
-
+            if (debater1SpectatorVotes > 0 || debater2SpectatorVotes > 0)
+            {
+                if (debater1SpectatorVotes > debater2SpectatorVotes) debater1Score++;
+                else if (debater2SpectatorVotes > debater1SpectatorVotes) debater2Score++;
+            }
             if (winnerByAi == debate.Debater1UserId) debater1Score++;
             else if (winnerByAi == debate.Debater2UserId) debater2Score++;
 
