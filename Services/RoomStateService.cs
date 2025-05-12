@@ -1,13 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using DebateRoyale.Models;
 using Microsoft.AspNetCore.SignalR;
-using DebateRoyale.Hubs; // Assicurati che l'hub sia referenziato correttamente
+using DebateRoyale.Hubs;
 
 namespace DebateRoyale.Services;
 
 public class ActiveDebateState
 {
-    public string DebateId { get; } = Guid.NewGuid().ToString(); // Unique ID for this active session
+    public string DebateId { get; } = Guid.NewGuid().ToString();
     public int RoomId { get; set; }
     public string SpecificTopic { get; set; } = "Not set";
     public string? Debater1ConnectionId { get; set; }
@@ -19,65 +19,104 @@ public class ActiveDebateState
     public DateTime StartTime { get; set; }
     public Timer? DebateTimer { get; set; }
     public List<string> Transcript { get; } = new List<string>();
-    public ConcurrentDictionary<string, string> Votes { get; } = new ConcurrentDictionary<string, string>(); // VoterUserId, VotedForDebaterUserId
+    public ConcurrentDictionary<string, string> Votes { get; } = new ConcurrentDictionary<string, string>();
     public bool IsActive { get; set; } = false;
     public bool IsEnding { get; set; } = false;
 }
 
 public class RoomStateService
 {
-    // RoomId -> ActiveDebateState
     private readonly ConcurrentDictionary<int, ActiveDebateState> _activeDebates = new();
-    private readonly ConcurrentDictionary<string, int> _userConnectionsToRoom = new(); // ConnectionId -> RoomId
+    private readonly ConcurrentDictionary<string, int> _userConnectionsToRoom = new();
     private readonly IHubContext<StanzaHub> _hubContext;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly GeminiService _geminiService;
 
-
     private static readonly Dictionary<int, List<string>> RoomSpecificDebateTopics = new()
     {
-        // Stanza ID 1: Politics Arena
+        // Stanza ID 1: Cultura Pop
         { 1, new List<string> {
-            "Should voting age be lowered to 16?",
-            "Is a universal basic income a viable solution for modern economies?",
-            "Should lobbying be more strictly regulated?",
-            "Is the current electoral system fair?",
-            "What is the government's role in healthcare?"
+            "I remake dei film classici sono un'opportunità creativa o uno sfruttamento commerciale?",
+            "La qualità musicale è diminuita nell'era dello streaming rispetto all'era dei CD?",
+            "Gli influencer dei social media rappresentano modelli positivi o dannosi per gli adolescenti?",
+            "Le serie TV contemporanee offrono una qualità narrativa superiore ai film?",
+            "In che modo il comportamento dei fan accaniti influisce sull'evoluzione delle opere creative?",
+            "I fumetti e i graphic novel meritano lo stesso riconoscimento artistico della letteratura classica?",
+            "La cultura pop contemporanea sfida o rafforza gli stereotipi sociali?",
+            "I programmi di reality televisivi offrono valore culturale o sono mero intrattenimento?",
+            "La visione continua di episodi di serie TV (binge-watching) compromette l'apprezzamento delle storie?",
+            "Il marketing della nostalgia limita l'innovazione nella cultura pop?"
         }},
-        // Stanza ID 2: Tech Sphere
+        // Stanza ID 2: Innovazione Tecnologica
         { 2, new List<string> {
-            "Will AI surpass human intelligence, and what are the implications?",
-            "Is data privacy an illusion in the digital age?",
-            "Should cryptocurrencies be regulated by governments?",
-            "The ethics of gene editing: where do we draw the line?",
-            "Are social media algorithms detrimental to society?"
+            "L'intelligenza artificiale creerà più opportunità di lavoro di quante ne eliminerà?",
+            "Le piattaforme social dovrebbero essere responsabili dei contenuti pubblicati dagli utenti?",
+            "I benefici della tecnologia 5G superano i potenziali rischi?",
+            "Quanto influiscono i videogiochi sul comportamento e sullo sviluppo cognitivo?",
+            "È possibile bilanciare comodità digitale e protezione della privacy personale?",
+            "I veicoli a guida autonoma dovrebbero avere una programmazione etica predefinita?",
+            "Un sistema educativo completamente digitale migliorerebbe o peggiorerebbe l'apprendimento?",
+            "Come dovrebbero essere tassati i profitti generati dall'automazione?",
+            "La crittografia forte dovrebbe includere backdoor per le forze dell'ordine?",
+            "Quali limiti dovrebbero essere imposti all'utilizzo di droni nello spazio pubblico e privato?"
         }},
-        // Stanza ID 3: Philosophy Hall
+        // Stanza ID 3: Filosofia e Pensiero Critico
         { 3, new List<string> {
-            "Does free will truly exist?",
-            "What is the nature of consciousness?",
-            "Is there an objective morality, or is it all relative?",
-            "The Trolley Problem: What is the most ethical choice?",
-            "What is the meaning of a good life?"
+            "Il determinismo è compatibile con la responsabilità morale?",
+            "La ricerca della felicità è il fine ultimo dell'esistenza umana?",
+            "Esistono verità oggettive o tutto è interpretazione soggettiva?",
+            "La civiltà è una sottile maschera sulla natura fondamentale dell'essere umano?",
+            "I principi etici sono universali o dipendono dal contesto culturale?",
+            "L'avanzamento tecnologico ci avvicina o allontana dalla nostra umanità?",
+            "Il dolore e la sofferenza sono necessari per la crescita personale?",
+            "Una società può progredire senza espressione artistica?",
+            "Esistono limiti intrinseci alla conoscenza scientifica?",
+            "È moralmente accettabile compiere azioni negative per un bene maggiore?"
         }},
-        // Stanza ID 4: Pop Culture Corner
+        // Stanza ID 4: Scienza
         { 4, new List<string> {
-            "Star Wars vs. Star Trek: Which is superior?",
-            "Are superhero movies oversaturating the film industry?",
-            "The impact of streaming services on music and film consumption.",
-            "Is reality TV a harmless entertainment убийца or a societal ill?", // "убийца" seems like a placeholder, replace it
-            "The evolution of video games as an art form."
+            "La clonazione umana a scopo terapeutico dovrebbe essere consentita?",
+            "Quali alternative alla sperimentazione animale sono scientificamente valide?",
+            "La colonizzazione di altri pianeti dovrebbe essere una priorità rispetto alla risoluzione dei problemi terrestri?",
+            "L'editing genetico umano rappresenta un'evoluzione naturale della medicina?",
+            "L'energia nucleare è componente necessaria nella transizione verso fonti rinnovabili?",
+            "Quali interventi sul cambiamento climatico sono più urgenti ed efficaci?",
+            "Chi dovrebbe stabilire i limiti etici della ricerca scientifica?",
+            "Gli alimenti geneticamente modificati possono risolvere la crisi alimentare globale?",
+            "Il metodo scientifico è applicabile a questioni metafisiche?",
+            "I benefici della ricerca astronomica giustificano gli investimenti pubblici richiesti?"
+        }},
+        // Stanza ID 5: Attualità e Politica
+        { 5, new List<string> {
+            "La globalizzazione economica favorisce lo sviluppo equo o aumenta le disuguaglianze?",
+            "Fino a che punto dovrebbe estendersi la regolamentazione governativa delle tecnologie digitali?",
+            "L'abbassamento dell'età di voto contribuirebbe a una democrazia più rappresentativa?",
+            "La disinformazione online dovrebbe essere combattuta con censura o educazione?",
+            "I dibattiti pubblici tra candidati politici dovrebbero essere obbligatori?",
+            "Un sistema giudiziario moderno può giustificare l'esistenza della pena capitale?",
+            "Le manifestazioni di piazza mantengono rilevanza nell'era dell'attivismo digitale?",
+            "Come bilanciare sorveglianza per la sicurezza nazionale e libertà civili?",
+            "Quali politiche migrative garantiscono benefici sia al paese ospitante che ai migranti?",
+            "I sistemi di voto elettronico possono essere resi sufficientemente sicuri e trasparenti?"
+        }},
+        // Stanza ID 6: Domande Aperte
+        { 6, new List<string> {
+            "Le preferenze alimentari controverse (come l'ananas sulla pizza) riflettono differenze culturali?",
+            "Gli animali domestici dovrebbero essere scelti in base al carattere o allo stile di vita del proprietario?",
+            "La vita urbana offre più opportunità o più stress rispetto a quella rurale?",
+            "I compiti a casa rafforzano l'apprendimento o creano disuguaglianze educative?",
+            "Come evolverà il concetto di libro nell'era digitale?",
+            "Quali riforme del calendario scolastico massimizzerebbero l'efficacia educativa?",
+            "I metodi di valutazione tradizionali riflettono adeguatamente le competenze moderne?",
+            "Le scelte alimentari personali hanno implicazioni etiche e ambientali?",
+            "La prosperità materiale contribuisce al benessere psicologico?",
+            "I viaggi solitari e di gruppo offrono esperienze diverse ma ugualmente valide?"
         }}
-        // Aggiungi una lista di argomenti di fallback se l'ID della stanza non viene trovato
-        // o se una stanza non ha argomenti specifici definiti.
-        // Potresti usare una chiave speciale come 0 o -1, o semplicemente una lista separata.
     };
 
     private static readonly List<string> FallbackDebateTopics = new()
     {
-        "Should pineapple be on pizza?",
-        "Cats vs. Dogs: Which make better pets?",
-        "Is it better to live in the city or the countryside?"
+        "La comunicazione digitale ha migliorato o danneggiato le relazioni interpersonali?"
     };
 
     private readonly Random _random = new();
@@ -94,21 +133,16 @@ public class RoomStateService
     {
         if (RoomSpecificDebateTopics.TryGetValue(roomId, out var specificTopics) && specificTopics.Any())
         {
-            // Abbiamo argomenti specifici per questa stanza
             return specificTopics[_random.Next(specificTopics.Count)];
         }
         else
         {
-            // Fallback se la stanza non ha argomenti specifici o l'ID non è trovato
-            // Potresti loggare un warning qui se ti aspetti che tutte le stanze abbiano argomenti
-            // _logger.LogWarning("No specific topics found for Room ID {RoomId}. Using fallback topic.", roomId);
             if (FallbackDebateTopics.Any())
             {
                 return FallbackDebateTopics[_random.Next(FallbackDebateTopics.Count)];
             }
             else
             {
-                // Estremo fallback se anche la lista di fallback è vuota
                 return "Discuss any interesting topic!";
             }
         }

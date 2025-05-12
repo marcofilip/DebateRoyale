@@ -3,6 +3,7 @@ using System;
 using DebateRoyale.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DebateRoyale.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512081549_AddNewRooms")]
+    partial class AddNewRooms
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
@@ -176,42 +178,42 @@ namespace DebateRoyale.Migrations
                         {
                             Id = 1,
                             GeneralTopic = "Cinema, musica, tendenze e fenomeni culturali",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Cultura Pop"
                         },
                         new
                         {
                             Id = 2,
                             GeneralTopic = "Nuove tecnologie, futuro digitale e impatti sociali",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Innovazione Tecnologica"
                         },
                         new
                         {
                             Id = 3,
                             GeneralTopic = "Dibattiti su etica, esistenza e grandi domande",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Filosofia e Pensiero Critico"
                         },
                         new
                         {
                             Id = 4,
                             GeneralTopic = "Fisica, biologia, chimica, scoperte e ricerche scientifiche",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Scienza"
                         },
                         new
                         {
                             Id = 5,
                             GeneralTopic = "Discussioni su politica, società e attualità",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Attualità e Politica"
                         },
                         new
                         {
                             Id = 6,
                             GeneralTopic = "Argomentazioni su temi generali e curiosità",
-                            MaxUsers = 20,
+                            MaxUsers = 0,
                             Name = "Domande Aperte"
                         });
                 });

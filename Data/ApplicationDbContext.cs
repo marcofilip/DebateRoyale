@@ -20,10 +20,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         // Seed Rooms
         builder.Entity<Room>().HasData(
-            new Room { Id = 1, Name = "Cultura Pop", GeneralTopic = "Film, musica, trends..." },
-            new Room { Id = 2, Name = "Tecnologia", GeneralTopic = "Il futuro della tecnologia" },
-            new Room { Id = 3, Name = "Filosofia", GeneralTopic = "Dibattiti filosofici" },
-            new Room { Id = 4, Name = "Politica", GeneralTopic = "Discussioni politiche" }
+            new Room { Id = 1, Name = "Cultura Pop", GeneralTopic = "Cinema, musica, tendenze e fenomeni culturali", MaxUsers = 20 },
+            new Room { Id = 2, Name = "Innovazione Tecnologica", GeneralTopic = "Nuove tecnologie, futuro digitale e impatti sociali", MaxUsers = 20 },
+            new Room { Id = 3, Name = "Filosofia e Pensiero Critico", GeneralTopic = "Dibattiti su etica, esistenza e grandi domande", MaxUsers = 20 },
+            new Room { Id = 4, Name = "Scienza", GeneralTopic = "Fisica, biologia, chimica, scoperte e ricerche scientifiche", MaxUsers = 20 },
+            new Room { Id = 5, Name = "Attualità e Politica", GeneralTopic = "Discussioni su politica, società e attualità", MaxUsers = 20 },
+            new Room { Id = 6, Name = "Domande Aperte", GeneralTopic = "Argomentazioni su temi generali e curiosità", MaxUsers = 20 }
         );
     }
 }
