@@ -1,6 +1,7 @@
 ﻿using DebateRoyale.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace DebateRoyale.Data;
 
@@ -17,6 +18,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<ApplicationUser>(b =>
+        {
+            b.Property(u => u.Id).HasMaxLength(128); 
+        });
+
+        builder.Entity<IdentityRole>(b =>
+        {
+            b.Property(r => r.Id).HasMaxLength(128);
+        });
 
         builder.Entity<Room>().HasData(
             new Room { Id = 1, Name = "Cultura Pop", GeneralTopic = "Cinema, musica, tendenze e fenomeni culturali", MaxUsers = 20 },
