@@ -4,7 +4,7 @@
 
 Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula un gioco di dibattito competitivo 1 contro 1 in tempo reale. Gli utenti possono entrare in stanze virtuali, sfidarsi su argomenti casuali, e venire giudicati sia dagli altri utenti spettatori che da un'intelligenza artificiale (Google Gemini).
 
-## ✨ Funzionalità Principali (Previste)
+## ✨ Funzionalità Principali
 
 -   🔐 **Autenticazione Utenti:** Registrazione e Login sicuri tramite ASP.NET Core Identity.
 -   🏠 **Stanze Multiple:** Diverse stanze tematiche dove gli utenti possono radunarsi (6 stanze, limite 20 utenti/stanza).
