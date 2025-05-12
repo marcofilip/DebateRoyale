@@ -121,3 +121,7 @@ Desktop.ini
 # Se hai altre cartelle/file generati localmente che non vuoi nel repo
 
 .vs/
+
+migration_final.sql
+
+*.pubxml
