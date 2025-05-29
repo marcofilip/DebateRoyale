@@ -1,5 +1,7 @@
 # 🗣️ Debate Royale 👑
 
+[![Stato Deploy Somee](https://img.shields.io/website?down_message=OFFLINE&label=debateroyale.somee.com&up_message=ONLINE&url=https%3A%2F%2Fdebateroyale.somee.com)](https://debateroyale.somee.com/)
+
 ## 📄 Descrizione Breve
 
 Debate Royale è un'applicazione web sviluppata in ASP.NET Core 6.0 che simula un gioco di dibattito competitivo 1 contro 1 in tempo reale. Gli utenti possono entrare in stanze virtuali, sfidarsi su argomenti casuali, e venire giudicati sia dagli altri utenti spettatori che da un'intelligenza artificiale (Google Gemini).
